@@ -1,0 +1,215 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Loan Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <!-- Loan Content -->
+  <div *ngIf="!isLoading && loan">
+    <!-- Header Card -->
+    <ion-card class="header-card">
+      <ion-card-content>
+        <div class="header-info">
+          <div>
+            <p class="loan-number">{{ loan.loanNumber }}</p>
+            <h2>{{ loan.productName }}</h2>
+            <ion-badge [color]="getStatusColor(loan.status)">{{ loan.status }}</ion-badge>
+          </div>
+          <div class="qr-button-section">
+            <ion-button (click)="generateQRCode()" size="small" fill="outline" color="primary">
+              <ion-icon slot="start" name="qr-code"></ion-icon>
+              Generate QR
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Segment -->
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="overview">
+        <ion-label>Overview</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="schedule">
+        <ion-label>Schedule</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>History</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Overview Tab -->
+    <div *ngIf="selectedSegment === 'overview'" class="segment-content">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Loan Summary</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="info-row">
+            <span class="label">Principal Amount:</span>
+            <span class="value">{{ formatCurrency(loan.principalAmount) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Interest Rate:</span>
+            <span class="value">{{ loan.interestRate }}%</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Payment Frequency:</span>
+            <span class="value">{{ loan.paymentFrequency }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Installment Amount:</span>
+            <span class="value">{{ formatCurrency(loan.installmentAmount) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Total Installments:</span>
+            <span class="value">{{ loan.totalInstallments }}</span>
+          </div>
+          <div class="info-row highlight">
+            <span class="label">Total Paid:</span>
+            <span class="value">{{ formatCurrency(loan.totalPaid) }}</span>
+          </div>
+          <div class="info-row highlight">
+            <span class="label">Outstanding Balance:</span>
+            <span class="value strong">{{ formatCurrency(loan.outstandingBalance) }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Important Dates</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="info-row">
+            <span class="label">Disbursed Date:</span>
+            <span class="value">{{ loan.disbursedDate ? formatDate(loan.disbursedDate) : 'N/A' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">First Payment:</span>
+            <span class="value">{{ loan.firstPaymentDate ? formatDate(loan.firstPaymentDate) : 'N/A' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Maturity Date:</span>
+            <span class="value">{{ loan.maturityDate ? formatDate(loan.maturityDate) : 'N/A' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Schedule Tab -->
+    <div *ngIf="selectedSegment === 'schedule'" class="segment-content">
+      <ion-card *ngFor="let item of paymentSchedule">
+        <ion-card-content>
+          <div class="schedule-item">
+            <div class="schedule-header">
+              <span class="installment-number">Installment #{{ item.installmentNumber }}</span>
+              <ion-badge [color]="getStatusColor(item.status)">{{ item.status }}</ion-badge>
+            </div>
+            <div class="schedule-details">
+              <div class="info-row">
+                <span class="label">Due Date:</span>
+                <span class="value">{{ formatDate(item.dueDate) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Principal:</span>
+                <span class="value">{{ formatCurrency(item.principalAmount) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Interest:</span>
+                <span class="value">{{ formatCurrency(item.interestAmount) }}</span>
+              </div>
+              <div class="info-row highlight">
+                <span class="label">Total Amount:</span>
+                <span class="value strong">{{ formatCurrency(item.totalAmount) }}</span>
+              </div>
+              <div class="info-row" *ngIf="item.paidAmount > 0">
+                <span class="label">Paid:</span>
+                <span class="value">{{ formatCurrency(item.paidAmount) }}</span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="empty-state" *ngIf="paymentSchedule.length === 0">
+        <p>No payment schedule available</p>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div *ngIf="selectedSegment === 'history'" class="segment-content">
+      <ion-card *ngFor="let payment of paymentHistory">
+        <ion-card-content>
+          <div class="history-item">
+            <div class="history-header">
+              <span class="receipt-number">{{ payment.receiptNumber }}</span>
+              <span class="payment-date">{{ formatDate(payment.paymentDate) }}</span>
+            </div>
+            <div class="history-details">
+              <div class="info-row">
+                <span class="label">Amount Paid:</span>
+                <span class="value strong">{{ formatCurrency(payment.amount) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Method:</span>
+                <span class="value">{{ payment.paymentMethod }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Principal:</span>
+                <span class="value">{{ formatCurrency(payment.principalPaid) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Interest:</span>
+                <span class="value">{{ formatCurrency(payment.interestPaid) }}</span>
+              </div>
+              <div class="info-row" *ngIf="payment.penaltyPaid > 0">
+                <span class="label">Penalty:</span>
+                <span class="value">{{ formatCurrency(payment.penaltyPaid) }}</span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="empty-state" *ngIf="paymentHistory.length === 0">
+        <p>No payment history yet</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <ion-modal [isOpen]="showQRModal" (didDismiss)="closeQRModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Payment QR Code</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeQRModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="qr-modal-content">
+          <h3>Show this QR code to the collector</h3>
+          <div class="qr-code-container">
+            <img [src]="qrCodeDataUrl" alt="Payment QR Code" *ngIf="qrCodeDataUrl" />
+          </div>
+          <p class="qr-info">This QR code contains your loan information for payment collection.</p>
+          <p class="qr-expiry">Valid for 5 minutes</p>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

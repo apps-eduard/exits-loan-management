@@ -1,0 +1,121 @@
+### Loan Management Endpoints
+
+# 1. Calculate Loan
+POST http://localhost:3000/api/loans/calculate
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "loanProductId": "{{loanProductId}}",
+  "principalAmount": 50000,
+  "term": 12
+}
+
+###
+
+# 2. Create Loan Application
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "customerId": "{{customerId}}",
+  "loanProductId": "{{loanProductId}}",
+  "requestedAmount": 50000,
+  "loanPurpose": "Business expansion",
+  "employmentStatus": "employed",
+  "monthlyIncome": 25000,
+  "sourceOfIncome": "Sari-sari store",
+  "collaterals": [
+    {
+      "collateralType": "property",
+      "description": "House and lot at 123 Main St, Iloilo City",
+      "estimatedValue": 1500000
+    }
+  ],
+  "comakers": [
+    {
+      "firstName": "Maria",
+      "lastName": "Santos",
+      "relationship": "spouse",
+      "contactNumber": "+639171234567",
+      "address": "123 Main St, Iloilo City"
+    }
+  ]
+}
+
+###
+
+# 3. Get All Loans
+GET http://localhost:3000/api/loans?status=draft&page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 4. Get Loan by ID
+GET http://localhost:3000/api/loans/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 5. Submit Loan for Review
+PUT http://localhost:3000/api/loans/{{loanId}}/submit
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 6. Approve Loan
+PUT http://localhost:3000/api/loans/{{loanId}}/approve
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 7. Reject Loan
+PUT http://localhost:3000/api/loans/{{loanId}}/reject
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "remarks": "Insufficient collateral value"
+}
+
+###
+
+# 8. Disburse Loan (auto-generates payment schedule and activates loan)
+PUT http://localhost:3000/api/loans/{{loanId}}/disburse
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 9. Get Payment Schedule
+GET http://localhost:3000/api/loans/{{loanId}}/schedule
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 10. Delete Loan (only draft)
+DELETE http://localhost:3000/api/loans/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Helper: Login to get access token
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pacifica.ph",
+  "password": "Admin@123"
+}
+
+###
+
+# Helper: Get Customers (to get customerId)
+GET http://localhost:3000/api/customers
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Helper: Get Loan Products (to get loanProductId)
+GET http://localhost:3000/api/loan-products
+Authorization: Bearer {{accessToken}}

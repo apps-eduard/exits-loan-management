@@ -1,0 +1,303 @@
+ion-content {
+  --background: #f5f5f5;
+  --color: #333;
+}
+
+// Products Container
+.products-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .header-icon {
+    font-size: 64px;
+    color: #667eea;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0 5px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+}
+
+ion-card {
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --background: white;
+
+  ion-card-header {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  ion-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #667eea;
+    }
+  }
+
+  ion-card-subtitle {
+    color: #666;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  ion-card-content {
+    padding: 16px;
+    color: #333;
+  }
+}
+
+.product-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  ion-icon {
+    font-size: 40px;
+    color: #667eea;
+  }
+}
+
+.product-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+
+  ion-icon {
+    font-size: 20px;
+    color: #667eea;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+  }
+}
+
+.select-button {
+  margin-top: 8px;
+  --border-color: #667eea;
+  --color: #667eea;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+// Application Container
+.application-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.product-summary {
+  margin-bottom: 20px;
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  ion-icon {
+    font-size: 40px;
+    color: #667eea;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+
+  p {
+    font-size: 13px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #e0e0e0;
+  --color: #333;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 16px;
+
+  ion-label {
+    --color: #666;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    --color: #333;
+    --placeholder-color: #999;
+  }
+
+  ion-note {
+    color: #999;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+.calculation-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  ion-card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  ion-card-title {
+    color: white;
+  }
+
+  ion-card-content {
+    color: white;
+  }
+}
+
+.calculation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+
+  strong {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+  }
+
+  &.highlight {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 16px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+
+    strong {
+      font-size: 20px;
+      color: #ffd700;
+    }
+  }
+
+  &.total {
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    padding-top: 16px;
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 600;
+
+    strong {
+      font-size: 20px;
+      color: #ffd700;
+    }
+  }
+}
+
+.divider {
+  --min-height: 0;
+  margin: 8px 0;
+}
+
+.submit-section {
+  margin-top: 24px;
+  margin-bottom: 32px;
+
+  ion-button {
+    height: 56px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .terms-note {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+  }
+}

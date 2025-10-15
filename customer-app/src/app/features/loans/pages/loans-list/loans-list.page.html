@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>My Loans</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Loading your loans...</p>
+  </div>
+
+  <!-- Loans List -->
+  <div class="loans-container" *ngIf="!isLoading && loans.length > 0">
+    <ion-card *ngFor="let loan of loans" (click)="viewLoan(loan.id)" button>
+      <ion-card-header>
+        <div class="loan-header">
+          <div>
+            <ion-card-subtitle>{{ loan.loanNumber }}</ion-card-subtitle>
+            <ion-card-title>{{ loan.productName }}</ion-card-title>
+          </div>
+          <ion-badge [color]="getStatusColor(loan.status)">
+            {{ loan.status }}
+          </ion-badge>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="loan-details">
+          <div class="detail-row">
+            <span class="label">Principal Amount:</span>
+            <span class="value">{{ formatCurrency(loan.principalAmount) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Outstanding Balance:</span>
+            <span class="value strong">{{ formatCurrency(loan.outstandingBalance) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Frequency:</span>
+            <span class="value">{{ loan.paymentFrequency }}</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section" *ngIf="loan.status === 'active'">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(loan.totalPaid / loan.principalAmount) * 100"></div>
+          </div>
+          <p class="progress-text">{{ ((loan.totalPaid / loan.principalAmount) * 100).toFixed(1) }}% paid</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && loans.length === 0">
+    <ion-icon name="wallet-outline" class="empty-icon"></ion-icon>
+    <h2>No Loans Yet</h2>
+    <p>Contact your branch to apply for a loan</p>
+  </div>
+</ion-content>

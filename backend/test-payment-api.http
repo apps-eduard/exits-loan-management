@@ -1,0 +1,175 @@
+### Payment Management Endpoints
+
+# 1. Post Payment
+POST http://localhost:3000/api/payments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "loanId": "{{loanId}}",
+  "amount": 5000,
+  "paymentDate": "2025-01-20",
+  "paymentMethod": "cash",
+  "referenceNumber": "",
+  "remarks": "Regular payment - January"
+}
+
+###
+
+# 2. Post Payment with Check
+POST http://localhost:3000/api/payments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "loanId": "{{loanId}}",
+  "amount": 10000,
+  "paymentDate": "2025-01-20",
+  "paymentMethod": "check",
+  "referenceNumber": "CHK-123456",
+  "remarks": "Check payment"
+}
+
+###
+
+# 3. Post Payment via GCash
+POST http://localhost:3000/api/payments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "loanId": "{{loanId}}",
+  "amount": 4583.34,
+  "paymentDate": "2025-01-20",
+  "paymentMethod": "gcash",
+  "referenceNumber": "GCH202501201234",
+  "remarks": "GCash transfer"
+}
+
+###
+
+# 4. Get Payment History for Loan
+GET http://localhost:3000/api/payments/loan/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 5. Get Payment Receipt Details
+GET http://localhost:3000/api/payments/{{paymentId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 6. Void Payment (Admin only)
+PUT http://localhost:3000/api/payments/{{paymentId}}/void
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "reason": "Duplicate payment entry - cancelled by customer"
+}
+
+###
+
+# Helper: Get Loan Details with Schedule
+GET http://localhost:3000/api/loans/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Helper: Get Payment Schedule
+GET http://localhost:3000/api/loans/{{loanId}}/schedule
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Complete Workflow: Create Loan → Approve → Disburse → Post Payments
+
+# Step 1: Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pacifica.ph",
+  "password": "Admin@123"
+}
+
+###
+
+# Step 2: Get Customer ID
+GET http://localhost:3000/api/customers
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 3: Get Loan Product ID
+GET http://localhost:3000/api/loan-products
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 4: Create Loan
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "customerId": "{{customerId}}",
+  "loanProductId": "{{loanProductId}}",
+  "requestedAmount": 50000,
+  "loanPurpose": "Business expansion",
+  "employmentStatus": "self-employed",
+  "monthlyIncome": 25000,
+  "sourceOfIncome": "Sari-sari store"
+}
+
+###
+
+# Step 5: Submit for Review
+PUT http://localhost:3000/api/loans/{{loanId}}/submit
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 6: Approve Loan
+PUT http://localhost:3000/api/loans/{{loanId}}/approve
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 7: Disburse Loan (generates payment schedule)
+PUT http://localhost:3000/api/loans/{{loanId}}/disburse
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 8: View Payment Schedule
+GET http://localhost:3000/api/loans/{{loanId}}/schedule
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 9: Post First Payment
+POST http://localhost:3000/api/payments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "loanId": "{{loanId}}",
+  "amount": 4583.34,
+  "paymentDate": "2025-02-15",
+  "paymentMethod": "cash",
+  "remarks": "First installment payment"
+}
+
+###
+
+# Step 10: View Payment History
+GET http://localhost:3000/api/payments/loan/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Step 11: View Updated Schedule
+GET http://localhost:3000/api/loans/{{loanId}}/schedule
+Authorization: Bearer {{accessToken}}

@@ -1,0 +1,108 @@
+# Test Authentication Endpoints
+
+## Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pacifica.ph",
+  "password": "Admin@123"
+}
+
+###
+
+## Get Profile (replace with actual token)
+GET http://localhost:3000/api/auth/profile
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+## Refresh Token (replace with actual refresh token)
+POST http://localhost:3000/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}
+
+###
+
+## Logout
+POST http://localhost:3000/api/auth/logout
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+## Health Check
+GET http://localhost:3000/api/health
+
+###
+
+# Test Customer Endpoints
+
+## Create Customer
+POST http://localhost:3000/api/customers
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "organizationalUnitId": "a0000000-0000-0000-0000-000000000002",
+  "firstName": "Juan",
+  "middleName": "Dela",
+  "lastName": "Cruz",
+  "dateOfBirth": "1990-05-15",
+  "gender": "male",
+  "civilStatus": "married",
+  "mobilePhone": "+639171234567",
+  "email": "juan.cruz@example.com",
+  "addressLine1": "123 Main Street",
+  "barangay": "Poblacion",
+  "cityMunicipality": "Iloilo City",
+  "province": "Iloilo",
+  "region": "Region VI - Western Visayas",
+  "postalCode": "5000",
+  "employmentStatus": "employed",
+  "employerName": "ABC Company",
+  "occupation": "Manager",
+  "monthlyIncome": 30000,
+  "emergencyContactName": "Maria Cruz",
+  "emergencyContactRelationship": "Spouse",
+  "emergencyContactPhone": "+639187654321"
+}
+
+###
+
+## Get All Customers
+GET http://localhost:3000/api/customers
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+## Get Customer by ID
+GET http://localhost:3000/api/customers/CUSTOMER_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+## Update Customer
+PUT http://localhost:3000/api/customers/CUSTOMER_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "monthlyIncome": 35000,
+  "occupation": "Senior Manager"
+}
+
+###
+
+## Verify Customer KYC
+POST http://localhost:3000/api/customers/CUSTOMER_ID_HERE/verify-kyc
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "status": "verified",
+  "notes": "All documents verified successfully"
+}
+

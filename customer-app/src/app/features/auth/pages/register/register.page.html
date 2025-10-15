@@ -1,0 +1,179 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goToLogin()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Create Account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="register-container">
+    <div class="register-card">
+      <!-- Header -->
+      <div class="header-section">
+        <ion-icon name="person-add" class="header-icon"></ion-icon>
+        <h2>Register as Customer</h2>
+        <p>Fill in your details to create an account</p>
+      </div>
+
+      <!-- Registration Form -->
+      <form (ngSubmit)="onSubmit()">
+        <!-- Personal Information -->
+        <div class="section-title">
+          <ion-icon name="person-outline"></ion-icon>
+          <span>Personal Information</span>
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="floating">First Name *</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="firstName"
+            name="firstName"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Last Name *</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="lastName"
+            name="lastName"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Email Address *</ion-label>
+          <ion-input
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            autocomplete="email"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Mobile Number *</ion-label>
+          <ion-input
+            type="tel"
+            [(ngModel)]="phone"
+            name="phone"
+            placeholder="09XX XXX XXXX"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <!-- Address Information -->
+        <div class="section-title">
+          <ion-icon name="location-outline"></ion-icon>
+          <span>Address Information</span>
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Street Address</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="address"
+            name="address"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Barangay</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="barangay"
+            name="barangay"
+          ></ion-input>
+        </ion-item>
+
+        <ion-row>
+          <ion-col size="6">
+            <ion-item lines="full">
+              <ion-label position="floating">City</ion-label>
+              <ion-input
+                type="text"
+                [(ngModel)]="city"
+                name="city"
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="6">
+            <ion-item lines="full">
+              <ion-label position="floating">Province</ion-label>
+              <ion-input
+                type="text"
+                [(ngModel)]="province"
+                name="province"
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Zip Code</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="zipCode"
+            name="zipCode"
+            maxlength="4"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Security -->
+        <div class="section-title">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span>Security</span>
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Password *</ion-label>
+          <ion-input
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            autocomplete="new-password"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Confirm Password *</ion-label>
+          <ion-input
+            type="password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            autocomplete="new-password"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <div class="password-hint">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <span>Password must be at least 8 characters long</span>
+        </div>
+
+        <!-- Terms -->
+        <div class="terms-text">
+          <p>By registering, you agree to our Terms and Conditions and Privacy Policy</p>
+        </div>
+
+        <!-- Submit Button -->
+        <ion-button expand="block" type="submit" class="register-button">
+          Create Account
+        </ion-button>
+      </form>
+
+      <!-- Footer -->
+      <div class="footer-text">
+        <p>Already have an account? <a (click)="goToLogin()">Login here</a></p>
+      </div>
+    </div>
+  </div>
+</ion-content>

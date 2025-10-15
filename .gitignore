@@ -1,0 +1,73 @@
+# Dependencies
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+
+# Build outputs
+**/dist/
+**/build/
+**/.angular/
+**/.vscode/chrome/
+**/out-tsc/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+
+# Misc
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# Testing
+**/coverage/
+**/.nyc_output/
+**/junit.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+**/tmp/
+**/temp/
+**/.tmp/
+
+# Capacitor
+**/android/
+**/ios/
+**/.capacitor/
+
+# Environment variables - IMPORTANT: .env is NOT ignored
+# We want to keep .env in the repository for this project
+# .env
+
+# Backend specific
+backend/dist/
+
+# Angular cache
+**/.angular/cache/
+
+# E2E
+**/e2e/*.js
+**/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db

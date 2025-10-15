@@ -1,0 +1,147 @@
+ion-content {
+  --background: #f5f5f5;
+}
+
+.register-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.register-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .header-icon {
+    font-size: 64px;
+    color: #667eea;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0 5px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #e0e0e0;
+  --color: #333;
+  --placeholder-color: #999;
+  --placeholder-opacity: 1;
+  margin-bottom: 16px;
+
+  ion-input {
+    --color: #333;
+    --placeholder-color: #999;
+  }
+
+  ion-label {
+    --color: #666;
+  }
+}
+
+ion-row {
+  ion-col {
+    padding: 0;
+
+    &:first-child {
+      padding-right: 8px;
+    }
+
+    &:last-child {
+      padding-left: 8px;
+    }
+  }
+}
+
+.password-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fff3cd;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #856404;
+
+  ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.terms-text {
+  padding: 16px 0;
+  text-align: center;
+
+  p {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+  }
+}
+
+.register-button {
+  margin-top: 8px;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border-radius: 8px;
+  height: 48px;
+  font-weight: 600;
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #666;
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

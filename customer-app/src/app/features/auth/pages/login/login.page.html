@@ -1,0 +1,54 @@
+<ion-content class="login-content">
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="logo-section">
+        <ion-icon name="wallet" class="logo-icon"></ion-icon>
+        <h1>Pacifica Finance</h1>
+        <p>Customer Portal</p>
+      </div>
+
+      <!-- Login Form -->
+      <form (ngSubmit)="onSubmit()">
+        <!-- Test Credentials Notice -->
+        <div class="test-notice">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <span>Demo credentials are pre-filled for testing</span>
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            autocomplete="email"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            autocomplete="current-password"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-button expand="block" type="submit" class="login-button">
+          Login
+        </ion-button>
+      </form>
+
+      <!-- Footer -->
+      <div class="footer-text">
+        <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+        <p class="support-text">Contact us for support:</p>
+        <p><strong>support@pacifica.ph</strong></p>
+      </div>
+    </div>
+  </div>
+</ion-content>

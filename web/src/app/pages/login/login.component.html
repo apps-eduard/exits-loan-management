@@ -1,0 +1,81 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-900 dark:to-primary-950 px-4">
+  <div class="max-w-md w-full">
+    <!-- Logo/Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">Pacifica Finance</h1>
+      <p class="text-primary-100 text-sm font-medium">Loan Management System</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="card">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign In</h2>
+      
+      @if (error()) {
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ error() }}</p>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label for="email" class="label">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="input"
+            placeholder="admin@pacifica.ph"
+            [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+          />
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400">Please enter a valid email address</p>
+          }
+        </div>
+
+        <div>
+          <label for="password" class="label">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="input"
+            placeholder="••••••••"
+            [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          />
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400">Password is required</p>
+          }
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label class="flex items-center">
+            <input type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Remember me</span>
+          </label>
+          <a href="#" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500">
+            Forgot password?
+          </a>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="loginForm.invalid || isLoading()"
+          class="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (isLoading()) {
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign In</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-6 text-center">
+      <p class="text-sm text-primary-100">
+        © 2025 Pacifica Finance Corporation. All rights reserved.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,148 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.header-card {
+  margin: 0;
+  border-radius: 0 0 16px 16px;
+
+  .header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .loan-number {
+      font-size: 12px;
+      color: #666;
+      margin: 0 0 4px 0;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+
+    .qr-button-section {
+      flex-shrink: 0;
+    }
+  }
+}
+
+ion-segment {
+  margin: 16px;
+}
+
+.segment-content {
+  padding: 0 16px 16px 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.highlight {
+    background: #f8f9fa;
+    margin: 0 -16px;
+    padding: 12px 16px;
+    border-bottom: none;
+  }
+
+  .label {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .value {
+    font-weight: 500;
+    font-size: 14px;
+
+    &.strong {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 16px;
+    }
+  }
+}
+
+.schedule-item, .history-item {
+  .schedule-header, .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+
+    .installment-number, .receipt-number {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .payment-date {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  .schedule-details, .history-details {
+    .info-row {
+      padding: 6px 0;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.qr-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .qr-code-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    img {
+      display: block;
+      width: 250px;
+      height: 250px;
+    }
+  }
+
+  .qr-info {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  .qr-expiry {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+  }
+}

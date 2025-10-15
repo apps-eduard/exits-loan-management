@@ -1,0 +1,60 @@
+import { Routes } from '@angular/router';
+import { authGuard, loginGuard } from './guards/auth.guard';
+import { LoginComponent } from './pages/login/login.component';
+import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
+
+export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: '/dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [loginGuard]
+  },
+  {
+    path: '',
+    component: DashboardLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'customers',
+        loadChildren: () => import('./pages/customers/customers.routes').then(m => m.CUSTOMER_ROUTES)
+      },
+      {
+        path: 'loans',
+        loadChildren: () => import('./pages/loans/loans.routes').then(m => m.LOAN_ROUTES)
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent)
+      },
+      {
+        path: 'reports',
+        loadComponent: () => import('./pages/reports/reports.component').then(m => m.ReportsComponent)
+      },
+      {
+        path: 'loan-products',
+        loadComponent: () => import('./pages/loan-products/loan-products.component').then(m => m.LoanProductsComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./pages/users/users.component').then(m => m.UsersComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      }
+    ]
+  },
+  {
+    path: '**',
+    redirectTo: '/dashboard'
+  }
+];

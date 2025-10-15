@@ -1,0 +1,249 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start" *ngIf="selectedProduct">
+      <ion-button (click)="backToProducts()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Apply for Loan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Loan Products Selection -->
+  <div class="products-container" *ngIf="!selectedProduct">
+    <div class="header-section">
+      <ion-icon name="cash-outline" class="header-icon"></ion-icon>
+      <h2>Choose a Loan Product</h2>
+      <p>Select the loan product that best fits your needs</p>
+    </div>
+
+    <ion-card *ngFor="let product of loanProducts" (click)="selectProduct(product)" button>
+      <ion-card-header>
+        <div class="product-header">
+          <ion-icon [name]="product.type === 'cash' ? 'cash' : 'cart'"></ion-icon>
+          <div>
+            <ion-card-title>{{ product.name }}</ion-card-title>
+            <ion-card-subtitle>{{ product.type | titlecase }} Loan</ion-card-subtitle>
+          </div>
+        </div>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <p class="product-description" *ngIf="product.description">{{ product.description }}</p>
+        
+        <div class="product-details">
+          <div class="detail-item">
+            <ion-icon name="wallet-outline"></ion-icon>
+            <div>
+              <span class="label">Loan Amount</span>
+              <span class="value">{{ formatCurrency(product.minAmount) }} - {{ formatCurrency(product.maxAmount) }}</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <div>
+              <span class="label">Interest Rate</span>
+              <span class="value">{{ product.interestRate }}% per annum</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div>
+              <span class="label">Loan Term</span>
+              <span class="value">{{ product.minTerm }} - {{ product.maxTerm }} months</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <ion-icon name="receipt-outline"></ion-icon>
+            <div>
+              <span class="label">Processing Fee</span>
+              <span class="value">{{ product.processingFee }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <ion-button expand="block" fill="outline" class="select-button">
+          Select This Product
+          <ion-icon slot="end" name="arrow-forward"></ion-icon>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="empty-state" *ngIf="loanProducts.length === 0">
+      <ion-icon name="documents-outline"></ion-icon>
+      <p>No loan products available at the moment</p>
+    </div>
+  </div>
+
+  <!-- Loan Application Form -->
+  <div class="application-container" *ngIf="selectedProduct">
+    <ion-card class="product-summary">
+      <ion-card-content>
+        <div class="summary-header">
+          <ion-icon [name]="selectedProduct.type === 'cash' ? 'cash' : 'cart'"></ion-icon>
+          <div>
+            <h3>{{ selectedProduct.name }}</h3>
+            <p>{{ selectedProduct.type | titlecase }} Loan</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <form (ngSubmit)="submitApplication()">
+      <!-- Loan Details -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="calculator-outline"></ion-icon>
+            Loan Details
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Loan Amount *</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="loanAmount"
+              name="loanAmount"
+              [min]="selectedProduct.minAmount"
+              [max]="selectedProduct.maxAmount"
+              (ionChange)="onAmountChange()"
+              required
+            ></ion-input>
+            <ion-note slot="helper">
+              Range: {{ formatCurrency(selectedProduct.minAmount) }} - {{ formatCurrency(selectedProduct.maxAmount) }}
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Loan Term (Months) *</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="loanTerm"
+              name="loanTerm"
+              [min]="selectedProduct.minTerm"
+              [max]="selectedProduct.maxTerm"
+              (ionChange)="onTermChange()"
+              required
+            ></ion-input>
+            <ion-note slot="helper">
+              Range: {{ selectedProduct.minTerm }} - {{ selectedProduct.maxTerm }} months
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Purpose of Loan *</ion-label>
+            <ion-textarea
+              [(ngModel)]="purpose"
+              name="purpose"
+              rows="3"
+              placeholder="Please describe the purpose of this loan"
+              required
+            ></ion-textarea>
+          </ion-item>
+
+          <ion-item *ngIf="selectedProduct.type === 'product'">
+            <ion-label position="stacked">Collateral (Optional)</ion-label>
+            <ion-textarea
+              [(ngModel)]="collateral"
+              name="collateral"
+              rows="2"
+              placeholder="Describe any collateral you can provide"
+            ></ion-textarea>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Financial Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="briefcase-outline"></ion-icon>
+            Financial Information
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Monthly Income *</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="monthlyIncome"
+              name="monthlyIncome"
+              placeholder="Enter your monthly income"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Employment Status *</ion-label>
+            <ion-select [(ngModel)]="employmentStatus" name="employmentStatus" interface="popover">
+              <ion-select-option *ngFor="let option of employmentOptions" [value]="option.value">
+                {{ option.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Loan Calculation Summary -->
+      <ion-card class="calculation-card" *ngIf="monthlyPayment > 0">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="analytics-outline"></ion-icon>
+            Loan Summary
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="calculation-row">
+            <span>Principal Amount:</span>
+            <strong>{{ formatCurrency(loanAmount) }}</strong>
+          </div>
+          <div class="calculation-row">
+            <span>Interest Rate:</span>
+            <strong>{{ selectedProduct.interestRate }}% p.a.</strong>
+          </div>
+          <div class="calculation-row">
+            <span>Loan Term:</span>
+            <strong>{{ loanTerm }} months</strong>
+          </div>
+          <div class="calculation-row">
+            <span>Processing Fee:</span>
+            <strong>{{ formatCurrency(processingFee) }}</strong>
+          </div>
+          <ion-item lines="none" class="divider"></ion-item>
+          <div class="calculation-row highlight">
+            <span>Monthly Payment:</span>
+            <strong>{{ formatCurrency(monthlyPayment) }}</strong>
+          </div>
+          <div class="calculation-row">
+            <span>Total Interest:</span>
+            <strong>{{ formatCurrency(totalInterest) }}</strong>
+          </div>
+          <div class="calculation-row total">
+            <span>Total Amount to Repay:</span>
+            <strong>{{ formatCurrency(totalAmount) }}</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Submit Button -->
+      <div class="submit-section">
+        <ion-button expand="block" type="submit" color="primary" size="large">
+          <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+          Submit Application
+        </ion-button>
+        
+        <ion-note class="terms-note">
+          By submitting this application, you agree to our Terms and Conditions
+        </ion-note>
+      </div>
+    </form>
+  </div>
+</ion-content>

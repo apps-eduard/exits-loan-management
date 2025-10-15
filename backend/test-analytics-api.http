@@ -1,0 +1,158 @@
+### Analytics & Reporting Endpoints
+
+# 1. Get Portfolio Summary
+GET http://localhost:3000/api/analytics/portfolio-summary
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 2. Get Delinquency Report
+GET http://localhost:3000/api/analytics/delinquency
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 3. Get Collector Performance Report
+# Query params: startDate (YYYY-MM-DD), endDate (YYYY-MM-DD)
+GET http://localhost:3000/api/analytics/collector-performance?startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 4. Get Branch Performance Report
+GET http://localhost:3000/api/analytics/branch-performance
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 5. Get Loan Aging Report
+GET http://localhost:3000/api/analytics/loan-aging
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 6. Get Dashboard Widgets Data
+# Combined data for dashboard view
+GET http://localhost:3000/api/analytics/dashboard
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ========================================
+# Complete Test Workflow
+# ========================================
+
+# Step 1: Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pacifica.ph",
+  "password": "Admin@123"
+}
+
+###
+
+# Step 2: Get Portfolio Summary
+GET http://localhost:3000/api/analytics/portfolio-summary
+Authorization: Bearer {{accessToken}}
+
+# Response includes:
+# - Total loans count
+# - Active loans count
+# - Total principal amount
+# - Total outstanding balance
+# - Total paid amount
+# - Average loan size
+# - Portfolio at Risk (PAR 1, 30, 60, 90)
+
+###
+
+# Step 3: Get Delinquency Breakdown
+GET http://localhost:3000/api/analytics/delinquency
+Authorization: Bearer {{accessToken}}
+
+# Response includes breakdown by days overdue:
+# - Current (0 days)
+# - PAR 1-29 days
+# - PAR 30-59 days
+# - PAR 60-89 days
+# - PAR 90+ days
+# Each with count, amount, and percentage
+
+###
+
+# Step 4: Get Collector Performance (Last 30 days)
+GET http://localhost:3000/api/analytics/collector-performance?startDate=2024-12-15&endDate=2025-01-15
+Authorization: Bearer {{accessToken}}
+
+# Response includes per collector:
+# - Total collections count
+# - Total amount collected
+# - Number of loans handled
+# - Average collection per loan
+# - On-time collection rate
+
+###
+
+# Step 5: Get Branch Performance
+GET http://localhost:3000/api/analytics/branch-performance
+Authorization: Bearer {{accessToken}}
+
+# Response includes per branch:
+# - Total loans
+# - Total disbursed amount
+# - Total collected amount
+# - Active loans count
+# - Overdue loans count
+# - Collection rate percentage
+
+###
+
+# Step 6: Get Loan Aging Report
+GET http://localhost:3000/api/analytics/loan-aging
+Authorization: Bearer {{accessToken}}
+
+# Response includes loans grouped by age:
+# - 0-30 days
+# - 31-60 days
+# - 61-90 days
+# - 91-180 days
+# - 180+ days
+# Each with count and outstanding amount
+
+###
+
+# Step 7: Get Dashboard Widgets (All-in-one)
+GET http://localhost:3000/api/analytics/dashboard
+Authorization: Bearer {{accessToken}}
+
+# Response includes:
+# - Portfolio summary
+# - Delinquency report
+# - Loan aging report
+# - Today's collections (count and amount)
+
+###
+
+# ========================================
+# Testing with Different Date Ranges
+# ========================================
+
+# Current Month Collector Performance
+GET http://localhost:3000/api/analytics/collector-performance?startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Last Quarter Collector Performance
+GET http://localhost:3000/api/analytics/collector-performance?startDate=2024-10-01&endDate=2024-12-31
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Year-to-Date Collector Performance
+GET http://localhost:3000/api/analytics/collector-performance?startDate=2025-01-01&endDate=2025-12-31
+Authorization: Bearer {{accessToken}}
+
+###
