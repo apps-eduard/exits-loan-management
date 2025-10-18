@@ -10,7 +10,7 @@ import { LoggerService } from '../services/logger.service';
  *   path: 'users',
  *   component: UsersComponent,
  *   canActivate: [rbacGuard],
- *   data: { permissions: ['manage_users'] } // OR logic
+ *   data: { permssions: ['manage_users'] } // OR logic
  *   data: { permissions: ['manage_users', 'view_users'], requireAll: true } // AND logic
  * }
  */
