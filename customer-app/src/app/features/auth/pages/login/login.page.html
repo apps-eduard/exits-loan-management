@@ -1,22 +1,36 @@
 <ion-content class="login-content">
-  <div class="login-container">
+  <!-- Theme Toggle Button -->
+  <ion-fab vertical="top" horizontal="end" slot="fixed">
+    <ion-fab-button size="small" (click)="toggleTheme()" class="theme-toggle">
+      <ion-icon [name]="isDarkMode ? 'sunny' : 'moon'"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <div class="login-container ion-padding">
     <div class="login-card">
-      <!-- Logo -->
-      <div class="logo-section">
-        <ion-icon name="wallet" class="logo-icon"></ion-icon>
+      <!-- Logo Section -->
+      <div class="logo-section ion-text-center">
+        <div class="logo-circle">
+          <ion-icon name="wallet"></ion-icon>
+        </div>
         <h1>Pacifica Finance</h1>
-        <p>Customer Portal</p>
+        <p class="subtitle">Customer Portal</p>
       </div>
 
       <!-- Login Form -->
       <form (ngSubmit)="onSubmit()">
         <!-- Test Credentials Notice -->
-        <div class="test-notice">
-          <ion-icon name="information-circle-outline"></ion-icon>
-          <span>Demo credentials are pre-filled for testing</span>
-        </div>
+        <ion-card class="info-card">
+          <ion-card-content class="ion-no-padding">
+            <div class="info-content">
+              <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+              <span>Demo credentials are pre-filled for testing</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
 
-        <ion-item lines="full">
+        <!-- Email Input -->
+        <ion-item lines="none" class="input-item">
           <ion-label position="floating">Email</ion-label>
           <ion-input
             type="email"
@@ -27,7 +41,8 @@
           ></ion-input>
         </ion-item>
 
-        <ion-item lines="full">
+        <!-- Password Input -->
+        <ion-item lines="none" class="input-item">
           <ion-label position="floating">Password</ion-label>
           <ion-input
             type="password"
@@ -38,16 +53,21 @@
           ></ion-input>
         </ion-item>
 
-        <ion-button expand="block" type="submit" class="login-button">
+        <!-- Login Button -->
+        <ion-button expand="block" type="submit" class="login-button" size="large">
+          <ion-icon slot="start" name="log-in-outline"></ion-icon>
           Login
         </ion-button>
       </form>
 
       <!-- Footer -->
-      <div class="footer-text">
-        <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+      <div class="footer-section ion-text-center">
+        <p class="register-link">
+          Don't have an account? 
+          <a routerLink="/register" class="link">Register here</a>
+        </p>
         <p class="support-text">Contact us for support:</p>
-        <p><strong>support@pacifica.ph</strong></p>
+        <p class="support-email">support@pacifica.ph</p>
       </div>
     </div>
   </div>

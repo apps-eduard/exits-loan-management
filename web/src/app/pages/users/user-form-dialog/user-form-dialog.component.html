@@ -1,0 +1,214 @@
+<div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" (click)="onClose()"></div>
+
+    <!-- Center modal -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <!-- Header -->
+        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
+              {{ isEditMode ? 'Edit User' : 'Create New User' }}
+            </h3>
+            <button type="button" (click)="onClose()" class="text-gray-400 hover:text-gray-500">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="space-y-4">
+            <!-- Email -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                formControlName="email"
+                [readonly]="isEditMode"
+                class="input-field"
+                [class.border-red-500]="f['email'].invalid && f['email'].touched"
+                placeholder="user@example.com">
+              @if (f['email'].invalid && f['email'].touched) {
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  @if (f['email'].errors?.['required']) {
+                    Email is required
+                  } @else if (f['email'].errors?.['email']) {
+                    Please enter a valid email
+                  }
+                </p>
+              }
+            </div>
+
+            <!-- Name Fields -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  First Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="firstName"
+                  class="input-field"
+                  [class.border-red-500]="f['firstName'].invalid && f['firstName'].touched"
+                  placeholder="John">
+                @if (f['firstName'].invalid && f['firstName'].touched) {
+                  <p class="mt-1 text-sm text-red-600 dark:text-red-400">First name is required</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Last Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="lastName"
+                  class="input-field"
+                  [class.border-red-500]="f['lastName'].invalid && f['lastName'].touched"
+                  placeholder="Doe">
+                @if (f['lastName'].invalid && f['lastName'].touched) {
+                  <p class="mt-1 text-sm text-red-600 dark:text-red-400">Last name is required</p>
+                }
+              </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                formControlName="phoneNumber"
+                class="input-field"
+                placeholder="+1234567890">
+            </div>
+
+            <!-- Role -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Role <span class="text-red-500">*</span>
+              </label>
+              <select
+                formControlName="roleId"
+                (change)="onRoleChange($any($event.target).value)"
+                class="input-field"
+                [class.border-red-500]="f['roleId'].invalid && f['roleId'].touched">
+                <option value="">Select a role</option>
+                @for (role of roles(); track role.id) {
+                  <option [value]="role.id">{{ role.name }}</option>
+                }
+              </select>
+              @if (f['roleId'].invalid && f['roleId'].touched) {
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">Role is required</p>
+              }
+            </div>
+
+            <!-- Organizational Unit -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Organizational Unit <span class="text-red-500">*</span>
+              </label>
+              <select
+                formControlName="organizationalUnitId"
+                class="input-field"
+                [class.border-red-500]="f['organizationalUnitId'].invalid && f['organizationalUnitId'].touched">
+                <option value="">Select a unit</option>
+                @for (unit of orgUnits(); track unit.id) {
+                  <option [value]="unit.id">{{ unit.name }} ({{ unit.code }})</option>
+                }
+              </select>
+              @if (f['organizationalUnitId'].invalid && f['organizationalUnitId'].touched) {
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">Organizational unit is required</p>
+              }
+            </div>
+
+            <!-- Password (only for create mode) -->
+            @if (!isEditMode) {
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Password <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  formControlName="password"
+                  class="input-field"
+                  [class.border-red-500]="f['password'].invalid && f['password'].touched"
+                  placeholder="Minimum 8 characters">
+                @if (f['password'].invalid && f['password'].touched) {
+                  <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    @if (f['password'].errors?.['required']) {
+                      Password is required
+                    } @else if (f['password'].errors?.['minlength']) {
+                      Password must be at least 8 characters
+                    }
+                  </p>
+                }
+              </div>
+            }
+
+            <!-- Status (only for edit mode) -->
+            @if (isEditMode) {
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Status
+                </label>
+                <select formControlName="status" class="input-field">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </div>
+            }
+
+            <!-- Permissions Preview -->
+            @if (rolePermissions().length > 0) {
+              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Role Permissions
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (permission of rolePermissions(); track permission.id) {
+                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+                      {{ permission.name }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+          <button
+            type="submit"
+            [disabled]="userForm.invalid || loading()"
+            class="btn-primary w-full sm:w-auto"
+            [class.opacity-50]="userForm.invalid || loading()">
+            @if (loading()) {
+              <svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
+            {{ isEditMode ? 'Update User' : 'Create User' }}
+          </button>
+          <button
+            type="button"
+            (click)="onClose()"
+            class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

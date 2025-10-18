@@ -61,6 +61,19 @@
     <ion-card>
       <ion-card-content>
         <ion-list lines="none">
+          <ion-item>
+            <ion-icon [name]="isDarkMode ? 'sunny-outline' : 'moon-outline'" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</h3>
+              <p>{{ isDarkMode ? 'Switch to light theme' : 'Switch to dark theme' }}</p>
+            </ion-label>
+            <ion-toggle 
+              slot="end" 
+              [checked]="isDarkMode" 
+              (ionChange)="toggleTheme()">
+            </ion-toggle>
+          </ion-item>
+
           <ion-item button (click)="confirmLogout()">
             <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
             <ion-label color="danger">

@@ -77,14 +77,39 @@ if (Test-CommandExists "git") {
 }
 
 # Check PostgreSQL
+$psqlFound = $false
 if (Test-CommandExists "psql") {
     $pgVersion = psql --version
     Write-Success "PostgreSQL is installed: $pgVersion"
+    $psqlFound = $true
 } else {
-    Write-ErrorMsg "PostgreSQL is NOT installed!"
-    Write-Info "Please install PostgreSQL from: https://www.postgresql.org/download/"
-    Write-Info "Recommended version: 14 or higher"
-    exit 1
+    # Try to find PostgreSQL in common installation directories
+    $pgPaths = @(
+        "C:\Program Files\PostgreSQL\18\bin",
+        "C:\Program Files\PostgreSQL\17\bin",
+        "C:\Program Files\PostgreSQL\16\bin",
+        "C:\Program Files\PostgreSQL\15\bin",
+        "C:\Program Files\PostgreSQL\14\bin"
+    )
+    
+    foreach ($path in $pgPaths) {
+        if (Test-Path (Join-Path $path "psql.exe")) {
+            Write-Info "Found PostgreSQL in: $path"
+            $env:PATH += ";$path"
+            $pgVersion = psql --version
+            Write-Success "PostgreSQL is installed: $pgVersion"
+            Write-Info "Added PostgreSQL to PATH for this session"
+            $psqlFound = $true
+            break
+        }
+    }
+    
+    if (-not $psqlFound) {
+        Write-ErrorMsg "PostgreSQL is NOT installed!"
+        Write-Info "Please install PostgreSQL from: https://www.postgresql.org/download/"
+        Write-Info "Recommended version: 14 or higher"
+        exit 1
+    }
 }
 
 # Check Ionic CLI
@@ -131,8 +156,8 @@ if ([string]::IsNullOrWhiteSpace($dbUser)) { $dbUser = "postgres" }
 $dbPassword = Read-Host "Database Password" -AsSecureString
 $dbPasswordPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($dbPassword))
 
-$dbName = Read-Host "Database Name (default: pacifica_loans)"
-if ([string]::IsNullOrWhiteSpace($dbName)) { $dbName = "pacifica_loans" }
+$dbName = Read-Host "Database Name (default: exits_loans_db)"
+if ([string]::IsNullOrWhiteSpace($dbName)) { $dbName = "exits_loans_db" }
 
 Write-Info "Testing database connection..."
 

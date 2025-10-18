@@ -33,12 +33,14 @@ export class AuthService {
     email: string,
     password: string
   ): Promise<UserWithRole | null> {
-    const result = await pool.query(
+    // First, try to find in users table (staff/admin)
+    let result = await pool.query(
       `
       SELECT 
         u.id, u.email, u.first_name, u.last_name, u.password_hash,
         u.role_id, r.name as role_name, u.status,
-        u.organizational_unit_id, ou.name as organizational_unit_name
+        u.organizational_unit_id, ou.name as organizational_unit_name,
+        'user' as user_type
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
       INNER JOIN organizational_units ou ON u.organizational_unit_id = ou.id
@@ -46,6 +48,23 @@ export class AuthService {
     `,
       [email]
     );
+
+    // If not found in users, try customers table
+    if (result.rows.length === 0) {
+      result = await pool.query(
+        `
+        SELECT 
+          c.id, c.email, c.first_name, c.last_name, c.password_hash,
+          'customer' as role_id, 'Customer' as role_name, c.status,
+          c.organizational_unit_id, ou.name as organizational_unit_name,
+          'customer' as user_type
+        FROM customers c
+        INNER JOIN organizational_units ou ON c.organizational_unit_id = ou.id
+        WHERE c.email = $1
+      `,
+        [email]
+      );
+    }
 
     if (result.rows.length === 0) {
       return null;
@@ -57,17 +76,29 @@ export class AuthService {
       return null;
     }
 
+    // Check if password_hash exists (for customers registered before password feature)
+    if (!user.password_hash) {
+      return null;
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
       return null;
     }
 
-    // Update last login
-    await pool.query(
-      "UPDATE users SET last_login_at = NOW() WHERE id = $1",
-      [user.id]
-    );
+    // Update last login based on user type
+    if (user.user_type === 'customer') {
+      await pool.query(
+        "UPDATE customers SET last_login_at = NOW() WHERE id = $1",
+        [user.id]
+      );
+    } else {
+      await pool.query(
+        "UPDATE users SET last_login_at = NOW() WHERE id = $1",
+        [user.id]
+      );
+    }
 
     return {
       id: user.id,
@@ -149,6 +180,11 @@ export class AuthService {
   }
 
   async getUserPermissions(roleId: string): Promise<string[]> {
+    // Customers don't have permissions in the role_permissions table
+    if (roleId === 'customer') {
+      return ['view_own_loans', 'apply_for_loan', 'make_payment', 'view_own_profile'];
+    }
+
     const result = await pool.query(
       `
       SELECT p.key

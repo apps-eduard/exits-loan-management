@@ -1,5 +1,8 @@
 import { pool } from "../config/database";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
+import bcrypt from "bcryptjs";
+import HttpException from "../utils/http-exception";
+import { StatusCodes } from "http-status-codes";
 
 export interface CreateCustomerDTO {
   organizationalUnitId: string;
@@ -299,6 +302,112 @@ export class CustomerService {
     `,
       values
     );
+
+    return result.rows[0];
+  }
+
+  async registerCustomer(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    password: string;
+    address: string;
+    barangay: string;
+    city: string;
+    province: string;
+    postalCode: string;
+  }): Promise<any> {
+    // Check if email already exists
+    const emailCheck = await pool.query(
+      "SELECT id FROM customers WHERE email = $1",
+      [data.email]
+    );
+
+    if (emailCheck.rows.length > 0) {
+      throw new HttpException(
+        StatusCodes.CONFLICT,
+        "Email already registered"
+      );
+    }
+
+    // Check if phone already exists
+    const phoneCheck = await pool.query(
+      "SELECT id FROM customers WHERE mobile_phone = $1",
+      [data.phone]
+    );
+
+    if (phoneCheck.rows.length > 0) {
+      throw new HttpException(
+        StatusCodes.CONFLICT,
+        "Phone number already registered"
+      );
+    }
+
+    // Get default organizational unit (region level or root unit)
+    const ouResult = await pool.query(
+      "SELECT id FROM organizational_units WHERE type = 'region' OR parent_id IS NULL ORDER BY created_at LIMIT 1"
+    );
+
+    if (ouResult.rows.length === 0) {
+      throw new Error("No organizational unit available");
+    }
+
+    const organizationalUnitId = ouResult.rows[0].id;
+
+    // Generate customer code
+    const customerCode = await this.generateCustomerCode(organizationalUnitId);
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    // Get system user for created_by (first admin user)
+    const systemUserResult = await pool.query(
+      "SELECT id FROM users WHERE role_id IN (SELECT id FROM roles WHERE name = 'Super Admin') ORDER BY created_at LIMIT 1"
+    );
+
+    const createdBy = systemUserResult.rows.length > 0 
+      ? systemUserResult.rows[0].id 
+      : null;
+
+    // Create customer with pending KYC status
+    const result = await pool.query(
+      `
+      INSERT INTO customers (
+        organizational_unit_id, customer_code, first_name, last_name,
+        email, mobile_phone, password_hash,
+        address_line1, barangay, city_municipality, province, postal_code,
+        region, date_of_birth, nationality,
+        emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
+        kyc_status, status, created_by, updated_by
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+        'NCR', '2000-01-01', 'Filipino',
+        'N/A', 'N/A', 'N/A',
+        'pending', 'active', $13, $13
+      )
+      RETURNING id, customer_code, first_name, last_name, email, mobile_phone, kyc_status, status
+    `,
+      [
+        organizationalUnitId,
+        customerCode,
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.phone,
+        passwordHash,
+        data.address || 'N/A',
+        data.barangay || 'N/A',
+        data.city || 'N/A',
+        data.province || 'N/A',
+        data.postalCode || '0000',
+        createdBy
+      ]
+    );
+
+    // Store password hash in a separate table (if you want customers to log in)
+    // For now, we'll just return the customer data
+    // You might want to create a customer_auth table for storing credentials
 
     return result.rows[0];
   }

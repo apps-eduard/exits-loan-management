@@ -90,7 +90,7 @@ export class RegisterPage {
       zipCode: this.zipCode || undefined
     };
 
-    this.http.post(`${environment.apiUrl}/customers`, customerData).subscribe({
+    this.http.post(`${environment.apiUrl}/auth/register`, customerData).subscribe({
       next: async (response: any) => {
         await loading.dismiss();
         if (response.success) {

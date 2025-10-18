@@ -17,11 +17,11 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ScriptDir\we
 Start-Sleep -Seconds 2
 
 Write-Host "[3/4] Starting Customer Mobile App..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ScriptDir\customer-app'; ionic serve"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ScriptDir\customer-app'; `$env:NG_DISABLE_VERSION_CHECK='1'; ionic serve"
 Start-Sleep -Seconds 2
 
 Write-Host "[4/4] Starting Collector Mobile App..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ScriptDir\collector-app'; ionic serve --port=8101"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$ScriptDir\collector-app'; `$env:NG_DISABLE_VERSION_CHECK='1'; ionic serve --port=8101"
 Start-Sleep -Seconds 2
 
 Write-Host ""

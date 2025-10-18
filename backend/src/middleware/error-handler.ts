@@ -23,12 +23,43 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     message = "Malformed JSON payload";
   }
 
-  logger.error({
-    err,
-    path: req.originalUrl,
+  // Enhanced error logging with more context
+  const errorContext = {
+    timestamp: new Date().toISOString(),
     method: req.method,
+    path: req.originalUrl,
     statusCode,
-  });
+    message,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  };
+
+  if (env.isDevelopment) {
+    console.log('\n' + '='.repeat(80));
+    console.log('❌ ERROR OCCURRED');
+    console.log('='.repeat(80));
+    console.log('📍 Request:', `${errorContext.method} ${errorContext.path}`);
+    console.log('⏰ Time:', errorContext.timestamp);
+    console.log('🔢 Status:', statusCode);
+    console.log('💬 Message:', message);
+    if (details) {
+      console.log('📋 Details:', JSON.stringify(details, null, 2));
+    }
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log('📦 Request Body:', JSON.stringify(req.body, null, 2));
+    }
+    if (err.stack) {
+      console.log('📚 Stack Trace:');
+      console.log(err.stack);
+    }
+    console.log('='.repeat(80) + '\n');
+  } else {
+    // Only log errors to pino in production
+    logger.error({
+      err,
+      ...errorContext,
+    });
+  }
 
   const payload: Record<string, unknown> = { message };
 

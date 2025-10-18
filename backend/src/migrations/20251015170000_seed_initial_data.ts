@@ -45,7 +45,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   // Insert permissions
   await pgm.sql(`
     INSERT INTO permissions (id, key, description) VALUES
-    -- User management
+    -- User management (granular)
     ('c0000000-0000-0000-0000-000000000001', 'users.create', 'Create new users'),
     ('c0000000-0000-0000-0000-000000000002', 'users.read', 'View user information'),
     ('c0000000-0000-0000-0000-000000000003', 'users.update', 'Update user information'),
@@ -57,13 +57,13 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     ('c0000000-0000-0000-0000-000000000007', 'ou.update', 'Update organizational units'),
     ('c0000000-0000-0000-0000-000000000008', 'ou.delete', 'Delete organizational units'),
     
-    -- Customer management
+    -- Customer management (granular)
     ('c0000000-0000-0000-0000-000000000009', 'customers.create', 'Create customer records'),
     ('c0000000-0000-0000-0000-000000000010', 'customers.read', 'View customer information'),
     ('c0000000-0000-0000-0000-000000000011', 'customers.update', 'Update customer information'),
     ('c0000000-0000-0000-0000-000000000012', 'customers.delete', 'Delete customer records'),
     
-    -- Loan management
+    -- Loan management (granular)
     ('c0000000-0000-0000-0000-000000000013', 'loans.create', 'Create loan applications'),
     ('c0000000-0000-0000-0000-000000000014', 'loans.read', 'View loan information'),
     ('c0000000-0000-0000-0000-000000000015', 'loans.update', 'Update loan information'),
@@ -71,7 +71,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     ('c0000000-0000-0000-0000-000000000017', 'loans.disburse', 'Disburse approved loans'),
     ('c0000000-0000-0000-0000-000000000018', 'loans.delete', 'Delete loan records'),
     
-    -- Payment management
+    -- Payment management (granular)
     ('c0000000-0000-0000-0000-000000000019', 'payments.create', 'Record payments'),
     ('c0000000-0000-0000-0000-000000000020', 'payments.read', 'View payment records'),
     ('c0000000-0000-0000-0000-000000000021', 'payments.update', 'Update payment records'),
@@ -83,7 +83,21 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     
     -- System settings
     ('c0000000-0000-0000-0000-000000000025', 'settings.read', 'View system settings'),
-    ('c0000000-0000-0000-0000-000000000026', 'settings.update', 'Update system settings');
+    ('c0000000-0000-0000-0000-000000000026', 'settings.update', 'Update system settings'),
+    
+    -- High-level permissions (for frontend route guards)
+    ('c0000000-0000-0000-0000-000000000027', 'manage_users', 'Manage users (create, read, update, delete)'),
+    ('c0000000-0000-0000-0000-000000000028', 'view_users', 'View users'),
+    ('c0000000-0000-0000-0000-000000000029', 'manage_customers', 'Manage customers'),
+    ('c0000000-0000-0000-0000-000000000030', 'view_customers', 'View customers'),
+    ('c0000000-0000-0000-0000-000000000031', 'manage_loans', 'Manage loans'),
+    ('c0000000-0000-0000-0000-000000000032', 'view_loans', 'View loans'),
+    ('c0000000-0000-0000-0000-000000000033', 'manage_payments', 'Manage payments'),
+    ('c0000000-0000-0000-0000-000000000034', 'view_payments', 'View payments'),
+    ('c0000000-0000-0000-0000-000000000035', 'view_reports', 'View reports'),
+    ('c0000000-0000-0000-0000-000000000036', 'view_analytics', 'View analytics'),
+    ('c0000000-0000-0000-0000-000000000037', 'manage_loan_products', 'Manage loan products'),
+    ('c0000000-0000-0000-0000-000000000038', 'view_loan_products', 'View loan products');
   `);
 
   // Assign all permissions to Super Admin

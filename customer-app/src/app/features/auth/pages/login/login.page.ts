@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { IonicModule, LoadingController, AlertController } from '@ionic/angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -12,23 +13,35 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, RouterModule]
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   // Default test credentials for easy testing (Super Admin)
   email: string = 'admin@pacifica.ph';
   password: string = 'Admin@123';
+  isDarkMode = false;
 
   constructor(
     private authService: AuthService,
+    private themeService: ThemeService,
     private router: Router,
     private loadingController: LoadingController,
     private alertController: AlertController
   ) {}
+
+  ngOnInit() {
+    this.isDarkMode = this.themeService.isDarkMode();
+  }
 
   ionViewWillEnter() {
     // Redirect if already logged in
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/tabs/loans'], { replaceUrl: true });
     }
+    this.isDarkMode = this.themeService.isDarkMode();
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+    this.isDarkMode = this.themeService.isDarkMode();
   }
 
   async onSubmit() {

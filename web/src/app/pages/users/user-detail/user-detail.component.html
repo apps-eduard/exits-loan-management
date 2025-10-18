@@ -1,0 +1,227 @@
+<div class="p-6">
+  @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+    </div>
+  } @else if (user()) {
+    <!-- Header -->
+    <div class="mb-6">
+      <button
+        (click)="goBack()"
+        class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Users
+      </button>
+
+      <div class="flex justify-between items-start">
+        <div class="flex items-center gap-4">
+          <div class="h-16 w-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-2xl font-semibold">
+            {{ user()!.firstName.charAt(0) }}{{ user()!.lastName.charAt(0) }}
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ user()!.firstName }} {{ user()!.lastName }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">{{ user()!.email }}</p>
+            <div class="flex items-center gap-3 mt-2">
+              <span [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + getStatusBadgeClass(user()!.status)">
+                {{ user()!.status }}
+              </span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ user()!.role.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2" *hasPermission="'manage_users'">
+          @if (user()!.status === 'active') {
+            <button
+              (click)="suspendUser()"
+              class="btn-secondary text-yellow-600 hover:text-yellow-700">
+              Suspend User
+            </button>
+          } @else if (user()!.status === 'suspended') {
+            <button
+              (click)="activateUser()"
+              class="btn-secondary text-green-600 hover:text-green-700">
+              Activate User
+            </button>
+          }
+          <button
+            (click)="resetPassword()"
+            class="btn-secondary">
+            Reset Password
+          </button>
+          <button
+            (click)="deleteUser()"
+            class="btn-secondary text-red-600 hover:text-red-700">
+            Delete User
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          (click)="activeTab.set('details')"
+          [class.border-primary-500]="activeTab() === 'details'"
+          [class.text-primary-600]="activeTab() === 'details'"
+          [class.dark:text-primary-400]="activeTab() === 'details'"
+          [class.border-transparent]="activeTab() !== 'details'"
+          [class.text-gray-500]="activeTab() !== 'details'"
+          [class.dark:text-gray-400]="activeTab() !== 'details'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm hover:text-primary-600 hover:border-primary-300">
+          Details
+        </button>
+        <button
+          (click)="activeTab.set('permissions')"
+          [class.border-primary-500]="activeTab() === 'permissions'"
+          [class.text-primary-600]="activeTab() === 'permissions'"
+          [class.dark:text-primary-400]="activeTab() === 'permissions'"
+          [class.border-transparent]="activeTab() !== 'permissions'"
+          [class.text-gray-500]="activeTab() !== 'permissions'"
+          [class.dark:text-gray-400]="activeTab() !== 'permissions'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm hover:text-primary-600 hover:border-primary-300">
+          Permissions
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    @if (activeTab() === 'details') {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Personal Information -->
+        <div class="card">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Personal Information
+          </h3>
+          <dl class="space-y-3">
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ user()!.email }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ user()!.phoneNumber || 'N/A' }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
+              <dd class="mt-1">
+                <span [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + getStatusBadgeClass(user()!.status)">
+                  {{ user()!.status }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Organization Information -->
+        <div class="card">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Organization
+          </h3>
+          <dl class="space-y-3">
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ user()!.role.name }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Organizational Unit</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ user()!.organizationalUnit.name }} ({{ user()!.organizationalUnit.code }})
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Unit Type</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">{{ user()!.organizationalUnit.type }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Activity Information -->
+        <div class="card lg:col-span-2">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Activity
+          </h3>
+          <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Login</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ user()!.lastLoginAt ? (user()!.lastLoginAt | date: 'medium') : 'Never' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ user()!.createdAt | date: 'medium' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ user()!.updatedAt | date: 'medium' }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'permissions') {
+      <div class="card">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          User Permissions
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          Permissions granted through the <span class="font-semibold">{{ user()!.role.name }}</span> role
+        </p>
+
+        @if (user()!.permissions.length === 0) {
+          <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+            No permissions assigned to this role
+          </p>
+        } @else {
+          <div class="space-y-6">
+            @for (group of getPermissionGroups(); track group.resource) {
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider">
+                  {{ group.resource }}
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  @for (permission of group.permissions; track permission.id) {
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                      <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                          {{ permission.name }}
+                        </p>
+                        @if (permission.description) {
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ permission.description }}
+                          </p>
+                        }
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          {{ permission.action }}
+                        </p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <div class="text-center py-12">
+      <p class="text-gray-500 dark:text-gray-400">User not found</p>
+    </div>
+  }
+</div>
