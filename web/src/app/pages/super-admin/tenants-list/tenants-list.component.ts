@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
 
 @Component({
@@ -54,7 +54,8 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               @for (tenant of tenants(); track tenant.id) {
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition"
+                    (click)="viewTenant(tenant.id, $event)">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-3">
@@ -92,14 +93,23 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
                     {{ formatDate(tenant.created_at) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a [routerLink]="['/super-admin/tenants', tenant.id]"
-                       class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">
-                      View
-                    </a>
-                    <button (click)="deleteTenant(tenant)"
-                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      Delete
-                    </button>
+                    <div class="flex items-center justify-end gap-3">
+                      <a [routerLink]="['/super-admin/tenants', tenant.id]"
+                         class="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-md transition">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View/Edit
+                      </a>
+                      <button (click)="deleteTenant(tenant)"
+                              class="inline-flex items-center px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-md transition">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               } @empty {
@@ -118,6 +128,7 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
 })
 export class TenantsListComponent implements OnInit {
   private tenantService = inject(TenantService);
+  private router = inject(Router);
   
   tenants = signal<Tenant[]>([]);
 
@@ -132,6 +143,16 @@ export class TenantsListComponent implements OnInit {
     } catch (error) {
       console.error('Failed to load tenants', error);
     }
+  }
+
+  viewTenant(tenantId: string, event: MouseEvent) {
+    // Don't navigate if clicking on action buttons
+    const target = event.target as HTMLElement;
+    if (target.closest('button') || target.closest('a')) {
+      event.stopPropagation();
+      return;
+    }
+    this.router.navigate(['/super-admin/tenants', tenantId]);
   }
 
   async deleteTenant(tenant: Tenant) {

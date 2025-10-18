@@ -6,7 +6,18 @@ import { tenantMiddleware, requireSuperAdmin } from '../middleware/tenant.middle
 const router = Router();
 const tenantController = new TenantController();
 
-// All routes require authentication and tenant context
+/**
+ * Public Routes - No authentication required
+ */
+
+// Public tenant registration
+router.post('/tenants/register', tenantController.registerTenant);
+
+/**
+ * Protected Routes - Authentication required
+ */
+
+// All routes below require authentication and tenant context
 router.use(authenticate, tenantMiddleware);
 
 /**

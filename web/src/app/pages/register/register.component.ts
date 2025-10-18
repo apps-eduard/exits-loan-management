@@ -41,8 +41,8 @@ import { LoggerService } from '../../services/logger.service';
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
-                  <p class="font-semibold text-green-900 dark:text-green-200">Account Created Successfully!</p>
-                  <p class="text-sm text-green-700 dark:text-green-300">Check your email for login credentials.</p>
+                  <p class="font-semibold text-green-900 dark:text-green-200">Registration Successful!</p>
+                  <p class="text-sm text-green-700 dark:text-green-300">Redirecting to login page...</p>
                 </div>
               </div>
             </div>
@@ -157,10 +157,48 @@ import { LoggerService } from '../../services/logger.service';
               </div>
             </div>
 
+            <!-- Admin Account Setup -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/20 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-sm font-bold">3</span>
+                Admin Account Setup
+              </h3>
+              
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Create your admin account to manage your tenant
+              </p>
+
+              <div>
+                <label class="label">Password *</label>
+                <input
+                  type="password"
+                  formControlName="password"
+                  class="input"
+                  placeholder="Min. 8 characters"
+                  [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+                  <p class="mt-1 text-xs text-red-600 dark:text-red-400">Password must be at least 8 characters</p>
+                }
+              </div>
+
+              <div>
+                <label class="label">Confirm Password *</label>
+                <input
+                  type="password"
+                  formControlName="confirmPassword"
+                  class="input"
+                  placeholder="Re-enter password"
+                  [class.border-red-500]="(registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) || (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched)">
+                @if (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+                  <p class="mt-1 text-xs text-red-600 dark:text-red-400">Passwords do not match</p>
+                }
+              </div>
+            </div>
+
             <!-- Choose Your Plan -->
             <div class="space-y-4">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <span class="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 text-sm font-bold">3</span>
+                <span class="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 text-sm font-bold">4</span>
                 Choose Your Plan
               </h3>
 
@@ -249,9 +287,22 @@ export class RegisterComponent {
     addressLine1: ['', Validators.required],
     city: ['', Validators.required],
     province: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+    confirmPassword: ['', Validators.required],
     subscriptionPlan: ['free', Validators.required],
     agreeToTerms: [false, Validators.requiredTrue]
+  }, {
+    validators: this.passwordMatchValidator
   });
+
+  /**
+   * Custom validator to check if passwords match
+   */
+  passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
 
   async onSubmit(): Promise<void> {
     if (this.registerForm.valid) {
@@ -277,9 +328,13 @@ export class RegisterComponent {
           state_province: formData.province,
           country: 'Philippines',
           subscription_plan: formData.subscriptionPlan,
-          billing_cycle: formData.subscriptionPlan === 'free' ? 'trial' : 'monthly',
+          billing_cycle: formData.subscriptionPlan === 'free' ? 'monthly' : 'monthly',
           primary_color: '#3B82F6', // Default blue
-          secondary_color: '#8B5CF6' // Default purple
+          secondary_color: '#8B5CF6', // Default purple
+          admin_email: formData.contactEmail,
+          admin_password: formData.password,
+          admin_first_name: formData.contactPerson.split(' ')[0] || formData.contactPerson,
+          admin_last_name: formData.contactPerson.split(' ').slice(1).join(' ') || ''
         };
 
         const result = await this.tenantService.createTenant(tenantData);
@@ -287,12 +342,16 @@ export class RegisterComponent {
         this.success.set(true);
         this.logger.success(`Tenant created: ${result.company_name}`);
 
-        // Redirect to tenant login after 3 seconds
+        // Redirect to login after 2 seconds
         setTimeout(() => {
-          this.router.navigate(['/auth/tenant', slug], {
-            queryParams: { newAccount: true }
+          this.router.navigate(['/auth/login'], {
+            queryParams: { 
+              newAccount: true,
+              email: formData.contactEmail,
+              message: 'Registration successful! Please log in with your credentials.'
+            }
           });
-        }, 3000);
+        }, 2000);
 
       } catch (err: any) {
         const errorMessage = err?.error?.error || err?.error?.message || 'Failed to create tenant account. Please try again.';

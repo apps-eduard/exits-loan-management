@@ -90,9 +90,17 @@ export class TenantService {
   }
 
   /**
-   * Create new tenant (Super Admin only or Public Registration)
+   * Create new tenant (Public Registration)
    */
-  async createTenant(data: Partial<Tenant>): Promise<Tenant> {
+  async createTenant(data: any): Promise<any> {
+    const response = await this.http.post<any>(`${this.apiUrl}/tenants/register`, data).toPromise();
+    return response?.data || response;
+  }
+
+  /**
+   * Create tenant by Super Admin (requires authentication)
+   */
+  async createTenantBySuperAdmin(data: Partial<Tenant>): Promise<Tenant> {
     const response = await this.http.post<any>(`${this.apiUrl}/super-admin/tenants`, data).toPromise();
     return response;
   }

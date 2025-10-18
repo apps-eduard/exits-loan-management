@@ -9,6 +9,51 @@ export class TenantController {
   }
 
   /**
+   * Public tenant registration (no authentication required)
+   */
+  registerTenant = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tenantData = req.body;
+      
+      // Validate required fields
+      if (!tenantData.company_name || !tenantData.contact_email || !tenantData.admin_password) {
+        res.status(400).json({ 
+          error: 'Missing required fields: company_name, contact_email, admin_password' 
+        });
+        return;
+      }
+
+      // Create tenant with admin user
+      const tenant = await this.tenantService.createTenant(tenantData);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Tenant registered successfully. Please log in with your credentials.',
+        data: {
+          tenant_id: tenant.id,
+          company_name: tenant.company_name,
+          slug: tenant.slug,
+          contact_email: tenant.contact_email
+        }
+      });
+    } catch (error: any) {
+      console.error('Error registering tenant:', error);
+      
+      // Check for duplicate slug or email
+      if (error.code === '23505') {
+        res.status(409).json({ 
+          error: 'A tenant with this company name or email already exists' 
+        });
+        return;
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to register tenant. Please try again.' 
+      });
+    }
+  };
+
+  /**
    * Get all tenants (Super Admin only)
    */
   getAllTenants = async (req: Request, res: Response): Promise<void> => {

@@ -1,4 +1,5 @@
 import { pool } from '../config/database';
+import bcrypt from 'bcryptjs';
 
 export interface Tenant {
   id: string;
@@ -47,6 +48,10 @@ export interface CreateTenantData {
   secondary_color?: string;
   subscription_plan: 'free' | 'basic' | 'professional' | 'enterprise' | 'custom';
   billing_cycle?: 'monthly' | 'yearly';
+  admin_email?: string;
+  admin_password?: string;
+  admin_first_name?: string;
+  admin_last_name?: string;
 }
 
 export interface TenantStats {
@@ -118,10 +123,10 @@ export class TenantService {
       const tenantResult = await client.query(`
         INSERT INTO tenants (
           company_name, slug, contact_email, contact_phone,
-          address_line1, address_line2, city, state_province,
+          address_line1, address_line2, city, province,
           postal_code, country, logo_url, primary_color, secondary_color,
-          status, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+          status, created_at, updated_at, tenant_code, contact_person
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW(), $15, $16)
         RETURNING *
       `, [
         data.company_name,
@@ -132,12 +137,14 @@ export class TenantService {
         data.address_line2,
         data.city,
         data.state_province,
-        data.postal_code,
+        data.postal_code || '',
         data.country,
         data.logo_url,
         data.primary_color,
         data.secondary_color,
-        'trial' // New tenants start in trial
+        'trial', // New tenants start in trial
+        data.slug, // tenant_code = slug for now
+        data.admin_first_name + ' ' + data.admin_last_name || 'Admin' // contact_person
       ]);
 
       const tenantId = tenantResult.rows[0].id;
@@ -148,18 +155,64 @@ export class TenantService {
       // Create subscription
       await client.query(`
         INSERT INTO subscriptions (
-          tenant_id, plan, max_customers, max_loans,
+          tenant_id, plan, status, max_customers, max_loans,
           max_users, billing_cycle, starts_at, ends_at,
           trial_ends_at, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW() + INTERVAL '1 month', NOW() + INTERVAL '14 days', NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW() + INTERVAL '1 month', NOW() + INTERVAL '14 days', NOW(), NOW())
       `, [
         tenantId,
         data.subscription_plan,
+        'trial', // New subscriptions start in trial status
         limits.max_customers,
         limits.max_loans,
         limits.max_users,
         data.billing_cycle || 'monthly'
       ]);
+
+      // Create admin user if credentials provided
+      if (data.admin_email && data.admin_password) {
+        const hashedPassword = await bcrypt.hash(data.admin_password, 10);
+        
+        // Get the Admin role ID
+        const roleResult = await client.query(`
+          SELECT id FROM roles WHERE name = 'Admin' LIMIT 1
+        `);
+        
+        if (roleResult.rows.length > 0) {
+          const roleId = roleResult.rows[0].id;
+          
+          // Create a default organizational unit (Head Office) for the tenant
+          const orgUnitResult = await client.query(`
+            INSERT INTO organizational_units (
+              tenant_id, name, code, type, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, NOW(), NOW())
+            RETURNING id
+          `, [
+            tenantId,
+            'Head Office',
+            `${data.slug.toUpperCase()}-HQ`,
+            'branch'
+          ]);
+          
+          const orgUnitId = orgUnitResult.rows[0].id;
+          
+          // Create admin user
+          await client.query(`
+            INSERT INTO users (
+              tenant_id, organizational_unit_id, email, password_hash, first_name, last_name,
+              role_id, status, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', NOW(), NOW())
+          `, [
+            tenantId,
+            orgUnitId,
+            data.admin_email,
+            hashedPassword,
+            data.admin_first_name || 'Admin',
+            data.admin_last_name || 'User',
+            roleId
+          ]);
+        }
+      }
 
       await client.query('COMMIT');
 
