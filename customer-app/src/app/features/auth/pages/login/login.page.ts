@@ -14,9 +14,9 @@ import { ThemeService } from '../../../../core/services/theme.service';
   imports: [IonicModule, CommonModule, FormsModule, RouterModule]
 })
 export class LoginPage implements OnInit {
-  // Default test credentials for easy testing (Super Admin)
-  email: string = 'admin@pacifica.ph';
-  password: string = 'Admin@123';
+  // Default test credentials for easy testing (Demo Customer)
+  email: string = 'customer@exits.com';
+  password: string = 'Customer@123';
   isDarkMode = false;
 
   constructor(

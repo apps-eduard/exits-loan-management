@@ -74,7 +74,7 @@ export class AuthService {
     this.clearTokens();
     this.currentUserSubject.next(null);
     this.logger.success('Logged out successfully');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 
   getProfile(): Observable<{ success: boolean; data: { user: User } }> {
@@ -121,6 +121,39 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  /**
+   * Check if current user is a Super Admin
+   * Super Admins can access all tenants
+   */
+  isSuperAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.isSuperAdmin === true;
+    } catch (error) {
+      this.logger.error('Failed to parse token for super admin check', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get tenant ID from JWT token
+   */
+  getTenantId(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.tenantId || null;
+    } catch (error) {
+      this.logger.error('Failed to parse token for tenant ID', error);
+      return null;
+    }
   }
 
   hasPermission(permission: string): boolean {

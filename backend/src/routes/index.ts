@@ -9,6 +9,7 @@ import loanRoutes from "./loan.routes";
 import paymentRoutes from "./payment.routes";
 import analyticsRoutes from "./analytics.routes";
 import userRoutes from "./user.routes";
+import tenantRoutes from "./tenant.routes";
 
 const router = Router();
 
@@ -41,6 +42,7 @@ router.use("/loans", loanRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/users", userRoutes);
+router.use("/", tenantRoutes); // Tenant routes include both /tenants/* and /super-admin/tenants/*
 
 // Log all registered routes in development
 if (env.isDevelopment) {
@@ -49,6 +51,7 @@ if (env.isDevelopment) {
   console.log('📋 '.repeat(40));
   console.log('✅ GET    /api/health');
   console.log('✅ *      /api/auth/*');
+  console.log('✅ *      /api/tenants/* (+ /super-admin/tenants/*)');
   console.log('✅ *      /api/customers/*');
   console.log('✅ *      /api/loan-products/*');
   console.log('✅ *      /api/loans/*');

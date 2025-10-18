@@ -1,25 +1,88 @@
 import { Routes } from '@angular/router';
 import { authGuard, loginGuard } from './guards/auth.guard';
 import { rbacGuard } from './guards/rbac.guard';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 import { LoginComponent } from './pages/login/login.component';
+import { TenantLoginComponent } from './pages/tenant-login/tenant-login.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/dashboard',
-    pathMatch: 'full'
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
   },
+  // Registration
   {
-    path: 'login',
-    component: LoginComponent,
+    path: 'register',
+    loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent),
     canActivate: [loginGuard]
   },
+  // Authentication Routes
   {
-    path: '',
+    path: 'auth',
+    children: [
+      {
+        path: 'login',
+        component: LoginComponent,
+        canActivate: [loginGuard]
+      },
+      {
+        path: 'tenant/:slug',
+        component: TenantLoginComponent,
+        canActivate: [loginGuard]
+      }
+    ]
+  },
+  // Legacy login route redirect
+  {
+    path: 'login',
+    redirectTo: '/auth/login',
+    pathMatch: 'full'
+  },
+  // Super Admin Routes (Cross-Tenant Management)
+  {
+    path: 'super-admin',
+    component: DashboardLayoutComponent,
+    canActivate: [authGuard, superAdminGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/super-admin/super-admin-dashboard/super-admin-dashboard.component').then(m => m.SuperAdminDashboardComponent)
+      },
+      {
+        path: 'tenants',
+        loadComponent: () => import('./pages/super-admin/tenants-list/tenants-list.component').then(m => m.TenantsListComponent)
+      },
+      {
+        path: 'tenants/create',
+        loadComponent: () => import('./pages/super-admin/tenant-form/tenant-form.component').then(m => m.TenantFormComponent)
+      },
+      {
+        path: 'tenants/:id',
+        loadComponent: () => import('./pages/super-admin/tenant-details/tenant-details.component').then(m => m.TenantDetailsComponent)
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./pages/super-admin/cross-tenant-analytics/cross-tenant-analytics.component').then(m => m.CrossTenantAnalyticsComponent)
+      }
+    ]
+  },
+  // Tenant Admin Routes (Standard for all tenants, tenant-scoped)
+  {
+    path: 'admin',
     component: DashboardLayoutComponent,
     canActivate: [authGuard],
     children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -66,8 +129,14 @@ export const routes: Routes = [
       }
     ]
   },
+  // Legacy redirect (old /dashboard route)
+  {
+    path: 'dashboard',
+    redirectTo: '/admin/dashboard',
+    pathMatch: 'full'
+  },
   {
     path: '**',
-    redirectTo: '/dashboard'
+    redirectTo: '/admin/dashboard'
   }
 ];

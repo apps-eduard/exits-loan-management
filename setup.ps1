@@ -268,11 +268,21 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 Write-Info "Running database migrations..."
+Write-Host "  - Creating core schema (users, roles, permissions)" -ForegroundColor DarkGray
+Write-Host "  - Creating business tables (customers, loans, payments)" -ForegroundColor DarkGray
+Write-Host "  - Creating multi-tenant SaaS architecture" -ForegroundColor DarkGray
+Write-Host "  - Seeding initial data and default tenant" -ForegroundColor DarkGray
 npm run migrate:up
 
 if ($LASTEXITCODE -eq 0) {
     Write-Success "Database migrations completed"
     Write-Success "Database tables and seed data created"
+    Write-Host ""
+    Write-Host "  Multi-Tenant Architecture Enabled:" -ForegroundColor Cyan
+    Write-Host "    ✓ Default Tenant: ExITS Finance System" -ForegroundColor Green
+    Write-Host "    ✓ Subscription: Enterprise (unlimited)" -ForegroundColor Green
+    Write-Host "    ✓ All existing data migrated to default tenant" -ForegroundColor Green
+    Write-Host ""
 } else {
     Write-ErrorMsg "Failed to run migrations"
     exit 1
@@ -326,7 +336,11 @@ Write-Host "  SETUP COMPLETED SUCCESSFULLY! ✓" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "Your Pacifica Loan Management System is ready!" -ForegroundColor Cyan
+Write-Host "Your ExITS Loan Management System is ready!" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "🏢 Multi-Tenant SaaS Platform Enabled" -ForegroundColor Magenta
+Write-Host "   Your system is ready to serve multiple companies" -ForegroundColor DarkGray
+Write-Host "   with complete data isolation and subscription management." -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "Default Test Credentials:" -ForegroundColor Yellow
 Write-Host "  Super Admin:" -ForegroundColor White
@@ -340,6 +354,10 @@ Write-Host ""
 Write-Host "  Loan Officer:" -ForegroundColor White
 Write-Host "    Email: officer@pacifica.ph" -ForegroundColor Gray
 Write-Host "    Password: Officer@123" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  Customer:" -ForegroundColor White
+Write-Host "    Email: customer@exits.com" -ForegroundColor Gray
+Write-Host "    Password: Customer@123" -ForegroundColor Gray
 Write-Host ""
 
 Write-Host "To start the applications:" -ForegroundColor Cyan
@@ -368,7 +386,10 @@ Write-Host ""
 Write-Host "Or use the start-all.ps1 script to start all services at once!" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "For more information, see README.md" -ForegroundColor Cyan
+Write-Host "📚 Documentation:" -ForegroundColor Cyan
+Write-Host "  - README.md - General setup and usage" -ForegroundColor Gray
+Write-Host "  - MULTI-TENANT-GUIDE.md - SaaS implementation guide" -ForegroundColor Gray
+Write-Host "  - SETUP-GUIDE.md - Detailed setup instructions" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Press any key to exit..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

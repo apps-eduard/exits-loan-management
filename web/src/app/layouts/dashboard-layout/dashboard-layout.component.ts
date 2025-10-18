@@ -26,24 +26,36 @@ export class DashboardLayoutComponent {
   user = computed(() => this.authService.getCurrentUser());
   isDarkMode = this.themeService.isDarkMode;
   pageTitle = signal('Dashboard');
+  isSuperAdmin = computed(() => this.authService.isSuperAdmin());
 
-  menuItems: MenuItem[] = [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'Customers', path: '/customers', icon: '👥', permission: 'customers.read' },
-    { label: 'Loans', path: '/loans', icon: '💰', permission: 'loans.read' },
-    { label: 'Payments', path: '/payments', icon: '💳', permission: 'payments.read' },
-    { label: 'Reports', path: '/reports', icon: '📈', permission: 'reports.view' },
-    { label: 'Loan Products', path: '/loan-products', icon: '📦' },
-    { label: 'Users', path: '/users', icon: '👤', permission: 'users.read' },
-    { label: 'Settings', path: '/settings', icon: '⚙️', permission: 'settings.read' },
+  // Super Admin menu items
+  superAdminMenuItems: MenuItem[] = [
+    { label: 'Dashboard', path: '/super-admin/dashboard', icon: '📊' },
+    { label: 'Tenants', path: '/super-admin/tenants', icon: '🏢' },
+    { label: 'Analytics', path: '/super-admin/analytics', icon: '📈' },
   ];
 
-  constructor() {
-    // Filter menu items based on permissions
-    this.menuItems = this.menuItems.filter(item => 
+  // Tenant Admin menu items (standard for all tenants)
+  tenantAdminMenuItems: MenuItem[] = [
+    { label: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
+    { label: 'Customers', path: '/admin/customers', icon: '👥', permission: 'customers.read' },
+    { label: 'Loans', path: '/admin/loans', icon: '💰', permission: 'loans.read' },
+    { label: 'Payments', path: '/admin/payments', icon: '💳', permission: 'payments.read' },
+    { label: 'Reports', path: '/admin/reports', icon: '📈', permission: 'reports.view' },
+    { label: 'Loan Products', path: '/admin/loan-products', icon: '📦' },
+    { label: 'Users', path: '/admin/users', icon: '👤', permission: 'users.read' },
+    { label: 'Settings', path: '/admin/settings', icon: '⚙️', permission: 'settings.read' },
+  ];
+
+  menuItems = computed(() => {
+    const items = this.isSuperAdmin() ? this.superAdminMenuItems : this.tenantAdminMenuItems;
+    // Filter based on permissions (only for tenant admin)
+    return items.filter(item => 
       !item.permission || this.authService.hasPermission(item.permission)
     );
+  });
 
+  constructor() {
     // Update page title on route change
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -56,7 +68,7 @@ export class DashboardLayoutComponent {
 
   private updatePageTitle(): void {
     const path = this.router.url.split('/')[1] || 'dashboard';
-    const menuItem = this.menuItems.find(item => item.path.includes(path));
+    const menuItem = this.menuItems().find(item => item.path.includes(path));
     this.pageTitle.set(menuItem?.label || 'Dashboard');
   }
 

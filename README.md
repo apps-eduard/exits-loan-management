@@ -1,16 +1,68 @@
-# Pacifica Loan Management System
+# ExITS Loan Management System - Multi-Tenant SaaS Platform
 
-A comprehensive loan management system built with Angular, Ionic, Node.js, Express, and PostgreSQL.
+A comprehensive multi-tenant loan management SaaS platform with Money Loan, Buy Now Pay Later (BNPL), and Pawnshop features. Built with Angular, Ionic, Node.js, Express, and PostgreSQL.
+
+## � Features
+
+### Core Platform
+- ✅ Multi-tenant architecture with data isolation
+- ✅ Subscription-based feature unlocking
+- ✅ Branded tenant login pages (custom logos & colors)
+- ✅ Super admin dashboard for cross-tenant management
+- ✅ Role-based access control (Super Admin, Admin, Collector)
+- ✅ User and customer management
+
+### Money Loan Feature (60% Complete)
+- 🔄 Borrower management with credit scoring
+- 🔄 Loan creation with flexible terms
+- 🔄 Approval workflow
+- 🔄 Payment schedule generation
+- 🔄 Repayment tracking with penalties
+- 🔄 Overdue management & reminders
+
+### Buy Now, Pay Later - BNPL (40% Complete)
+- 🔄 Customer credit management
+- 🔄 Multi-item purchase orders
+- 🔄 Flexible installment terms
+- 🔄 Payment collection & tracking
+- 🔄 Sales performance reporting
+
+### Pawnshop Feature (Planned)
+- 🔴 Collateral item management
+- 🔴 Pawn ticket system
+- 🔴 Redemption & renewal
+- 🔴 Forfeiture & auction
+
+## 📚 Documentation
+
+- [IMPLEMENTATION-SUMMARY.md](./IMPLEMENTATION-SUMMARY.md) - **START HERE** - Complete overview of what's built
+- [FEATURES-IMPLEMENTATION-STATUS.md](./FEATURES-IMPLEMENTATION-STATUS.md) - Detailed feature status tracking
+- [BNPL-FEATURE-GUIDE.md](./BNPL-FEATURE-GUIDE.md) - Buy Now Pay Later implementation guide
+- [SETUP-GUIDE.md](./SETUP-GUIDE.md) - Installation & setup instructions
+- [development-plan.md](./development-plan.md) - Development roadmap
+- [GIT-SETUP.md](./GIT-SETUP.md) - Git configuration
+- [GITHUB-UPLOAD-GUIDE.md](./GITHUB-UPLOAD-GUIDE.md) - GitHub upload guide
 
 ## 🏗️ Project Structure
 
 ```
-loan-management-system/
+exits-loan-management/
 ├── backend/              # Node.js + Express API server
+│   └── src/
+│       ├── migrations/   # Database migrations (21 files)
+│       ├── services/     # Business logic
+│       ├── controllers/  # API endpoints
+│       └── middleware/   # Auth, error handling
 ├── web/                  # Angular admin web application
+│   └── src/app/
+│       ├── core/
+│       │   ├── models/   # TypeScript interfaces (13 files)
+│       │   ├── services/ # HTTP services
+│       │   └── guards/   # Route guards
+│       └── pages/        # Page components
 ├── customer-app/         # Ionic mobile app for customers
 ├── collector-app/        # Ionic mobile app for collectors
-└── development-plan.md   # Development roadmap
+└── *.md                  # Documentation files
 ```
 
 ## 📋 Prerequisites
@@ -21,14 +73,14 @@ loan-management-system/
 - Ionic CLI: `npm install -g @ionic/cli`
 - Angular CLI: `npm install -g @angular/cli`
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### 1. Database Setup
 
 Create a PostgreSQL database:
 
 ```sql
-CREATE DATABASE pacifica_loans;
+CREATE DATABASE exits_loans_db;
 ```
 
 ### 2. Backend Setup
@@ -37,17 +89,17 @@ CREATE DATABASE pacifica_loans;
 cd backend
 npm install
 
-# Configure database connection in .env file
-# The .env file is included in the repository
+# Configure database connection in .env
+# Edit backend/.env with your PostgreSQL credentials
 
-# Run migrations
-npm run migrate:up
+# Run migrations to create all tables
+npm run migrate up
 
 # Start development server
 npm run dev
 ```
 
-Backend will run on `http://localhost:3000`
+Backend runs on `http://localhost:3000`
 
 ### 3. Web Admin App Setup
 

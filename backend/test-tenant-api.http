@@ -1,0 +1,226 @@
+### Multi-Tenant API Tests
+### Base URL: http://localhost:3000/api
+
+@baseUrl = http://localhost:3000/api
+@token = {{login.response.body.accessToken}}
+@tenantId = 00000000-0000-0000-0000-000000000001
+
+###############################################
+# 1. Login as Super Admin
+###############################################
+
+### Login (Super Admin)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pacifica.ph",
+  "password": "Admin123"
+}
+
+###############################################
+# 2. Super Admin - Tenant Management
+###############################################
+
+### Get All Tenants (Super Admin Only)
+GET {{baseUrl}}/super-admin/tenants
+Authorization: Bearer {{token}}
+
+### Create New Tenant (Super Admin Only)
+POST {{baseUrl}}/super-admin/tenants
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_name": "Test Company Inc.",
+  "slug": "test-company",
+  "contact_email": "contact@testcompany.com",
+  "contact_phone": "+63 912 345 6789",
+  "address_line1": "123 Test Street",
+  "city": "Manila",
+  "state_province": "Metro Manila",
+  "postal_code": "1000",
+  "country": "Philippines",
+  "subscription_plan": "basic",
+  "billing_cycle": "monthly"
+}
+
+### Get Specific Tenant (Super Admin)
+GET {{baseUrl}}/tenants/{{tenantId}}
+Authorization: Bearer {{token}}
+
+### Update Tenant (Super Admin)
+PUT {{baseUrl}}/tenants/{{tenantId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_name": "ExITS Finance System - Updated",
+  "primary_color": "#3B82F6"
+}
+
+### Get Tenant Statistics
+GET {{baseUrl}}/tenants/{{tenantId}}/stats
+Authorization: Bearer {{token}}
+
+### Delete Tenant (Super Admin Only)
+DELETE {{baseUrl}}/super-admin/tenants/{{tenantId}}
+Authorization: Bearer {{token}}
+
+###############################################
+# 3. Tenant Admin - Own Tenant Only
+###############################################
+
+### Login as Tenant Admin
+# @name tenantLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@exits.com",
+  "password": "Admin123"
+}
+
+@tenantToken = {{tenantLogin.response.body.accessToken}}
+
+### Get Current Tenant (From JWT)
+GET {{baseUrl}}/tenants/current
+Authorization: Bearer {{tenantToken}}
+
+### Get Own Tenant Details
+GET {{baseUrl}}/tenants/{{tenantId}}
+Authorization: Bearer {{tenantToken}}
+
+### Update Own Tenant (Limited Fields)
+PUT {{baseUrl}}/tenants/{{tenantId}}
+Authorization: Bearer {{tenantToken}}
+Content-Type: application/json
+
+{
+  "contact_phone": "+63 912 999 8888",
+  "logo_url": "https://example.com/new-logo.png"
+}
+
+### Get Own Tenant Stats
+GET {{baseUrl}}/tenants/{{tenantId}}/stats
+Authorization: Bearer {{tenantToken}}
+
+### Try to Get All Tenants (Should Fail - Not Super Admin)
+GET {{baseUrl}}/super-admin/tenants
+Authorization: Bearer {{tenantToken}}
+
+### Try to Create Tenant (Should Fail - Not Super Admin)
+POST {{baseUrl}}/super-admin/tenants
+Authorization: Bearer {{tenantToken}}
+Content-Type: application/json
+
+{
+  "company_name": "Unauthorized Tenant",
+  "slug": "unauthorized"
+}
+
+###############################################
+# 4. Data Isolation Tests
+###############################################
+
+### Login as Tenant A Admin
+# @name tenantALogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tenanta.com",
+  "password": "Admin123"
+}
+
+@tenantAToken = {{tenantALogin.response.body.accessToken}}
+
+### Get Customers (Should only see Tenant A's customers)
+GET {{baseUrl}}/customers?page=1&limit=10
+Authorization: Bearer {{tenantAToken}}
+
+### Login as Tenant B Admin
+# @name tenantBLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tenantb.com",
+  "password": "Admin123"
+}
+
+@tenantBToken = {{tenantBLogin.response.body.accessToken}}
+
+### Get Customers (Should only see Tenant B's customers)
+GET {{baseUrl}}/customers?page=1&limit=10
+Authorization: Bearer {{tenantBToken}}
+
+###############################################
+# 5. Verify JWT Contents
+###############################################
+
+### Decode JWT (Copy token and use jwt.io)
+# Super Admin JWT should contain:
+# {
+#   "userId": "...",
+#   "email": "admin@pacifica.ph",
+#   "tenantId": "00000000-0000-0000-0000-000000000001",
+#   "isSuperAdmin": true
+# }
+
+### Tenant Admin JWT should contain:
+# {
+#   "userId": "...",
+#   "email": "admin@exits.com",
+#   "tenantId": "00000000-0000-0000-0000-000000000001",
+#   "isSuperAdmin": false
+# }
+
+###############################################
+# 6. Subscription Management
+###############################################
+
+### Get Tenant with Subscription Info
+GET {{baseUrl}}/tenants/{{tenantId}}
+Authorization: Bearer {{token}}
+
+### Expected Response:
+# {
+#   "id": "00000000-0000-0000-0000-000000000001",
+#   "company_name": "ExITS Finance System",
+#   "subscription_plan": "enterprise",
+#   "max_customers": -1,  // Unlimited
+#   "max_loans": -1,
+#   "max_users": -1,
+#   "status": "active",
+#   ...
+# }
+
+###############################################
+# 7. Error Handling Tests
+###############################################
+
+### Try to access tenant route without token (Should Fail)
+GET {{baseUrl}}/tenants/current
+
+### Try to access super admin route as regular user (Should Fail)
+GET {{baseUrl}}/super-admin/tenants
+Authorization: Bearer {{tenantToken}}
+
+### Try to update another tenant's data (Should Fail)
+PUT {{baseUrl}}/tenants/different-tenant-id
+Authorization: Bearer {{tenantToken}}
+Content-Type: application/json
+
+{
+  "company_name": "Unauthorized Update"
+}
+
+###############################################
+# 8. Cleanup
+###############################################
+
+### Delete Test Tenant
+# DELETE {{baseUrl}}/super-admin/tenants/{{testTenantId}}
+# Authorization: Bearer {{token}}

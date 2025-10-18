@@ -21,9 +21,40 @@ export class LoginComponent {
   error = signal<string | null>(null);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['admin@exits.com', [Validators.required, Validators.email]],
+    email: ['admin@pacifica.ph', [Validators.required, Validators.email]],
     password: ['ChangeMe123!', Validators.required]
   });
+
+  /**
+   * Quick login for testing - fills credentials and submits
+   */
+  quickLogin(role: 'super-admin' | 'tenant-admin' | 'collector'): void {
+    const credentials = {
+      'super-admin': {
+        email: 'admin@pacifica.ph',
+        password: 'Admin@123'
+      },
+      'tenant-admin': {
+        email: 'admin@exits.com',
+        password: 'ChangeMe123!'
+      },
+      'collector': {
+        email: 'collector@exits.com',
+        password: 'ChangeMe123!'
+      }
+    };
+
+    const creds = credentials[role];
+    this.loginForm.patchValue({
+      email: creds.email,
+      password: creds.password
+    });
+
+    // Auto-submit after a brief delay to show the filled form
+    setTimeout(() => {
+      this.onSubmit();
+    }, 300);
+  }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
@@ -37,8 +68,11 @@ export class LoginComponent {
         next: (response) => {
           this.isLoading.set(false);
           if (response.success) {
-            this.logger.success(`✅ Login successful, redirecting to dashboard...`);
-            this.router.navigate(['/dashboard']);
+            // Check if user is super admin and redirect accordingly
+            const isSuperAdmin = this.authService.isSuperAdmin();
+            const redirectPath = isSuperAdmin ? '/super-admin/dashboard' : '/admin/dashboard';
+            this.logger.success(`✅ Login successful, redirecting to ${redirectPath}...`);
+            this.router.navigate([redirectPath]);
           }
         },
         error: (err) => {

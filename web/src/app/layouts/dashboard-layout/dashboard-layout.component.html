@@ -7,7 +7,7 @@
 
   <!-- Navigation -->
   <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-    @for (item of menuItems; track item.path) {
+    @for (item of menuItems(); track item.path) {
       <a
         [routerLink]="item.path"
         routerLinkActive="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"

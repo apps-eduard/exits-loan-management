@@ -1,26 +1,33 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { TenantService } from '../../core/services/tenant.service';
+import { TenantHeaderComponent } from '../../shared/components/tenant-header/tenant-header.component';
+import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 
 interface StatCard {
   title: string;
   value: string;
   change: string;
   icon: string;
-  trend: 'up' | 'down';
+  trend: 'positive' | 'negative' | 'neutral';
   color: string;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, TenantHeaderComponent, StatCardComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
+  private tenantService = inject(TenantService);
   
   user = this.authService.getCurrentUser();
+  currentTenant = this.tenantService.currentTenant;
+  isSuperAdmin = this.authService.isSuperAdmin();
   isLoading = signal(false);
 
   stats = signal<StatCard[]>([
@@ -29,7 +36,7 @@ export class DashboardComponent implements OnInit {
       value: '1,234',
       change: '+12%',
       icon: '👥',
-      trend: 'up',
+      trend: 'positive',
       color: 'text-blue-600 dark:text-blue-400'
     },
     {
@@ -37,7 +44,7 @@ export class DashboardComponent implements OnInit {
       value: '456',
       change: '+8%',
       icon: '💰',
-      trend: 'up',
+      trend: 'positive',
       color: 'text-green-600 dark:text-green-400'
     },
     {
@@ -45,7 +52,7 @@ export class DashboardComponent implements OnInit {
       value: '23',
       change: '-5%',
       icon: '⏳',
-      trend: 'down',
+      trend: 'negative',
       color: 'text-yellow-600 dark:text-yellow-400'
     },
     {
@@ -53,7 +60,7 @@ export class DashboardComponent implements OnInit {
       value: '₱12.5M',
       change: '+15%',
       icon: '📈',
-      trend: 'up',
+      trend: 'positive',
       color: 'text-purple-600 dark:text-purple-400'
     },
     {
@@ -61,7 +68,7 @@ export class DashboardComponent implements OnInit {
       value: '94.5%',
       change: '+2.3%',
       icon: '💳',
-      trend: 'up',
+      trend: 'positive',
       color: 'text-teal-600 dark:text-teal-400'
     },
     {
@@ -69,7 +76,7 @@ export class DashboardComponent implements OnInit {
       value: '12',
       change: '-18%',
       icon: '⚠️',
-      trend: 'down',
+      trend: 'negative',
       color: 'text-red-600 dark:text-red-400'
     }
   ]);
@@ -82,8 +89,12 @@ export class DashboardComponent implements OnInit {
     { action: 'Loan disbursed', customer: 'Jose Ramirez', time: '5 hours ago', status: 'completed' }
   ]);
 
-  ngOnInit(): void {
-    // TODO: Fetch actual dashboard data from API
+  async ngOnInit(): Promise<void> {
+    // Load current tenant information
+    await this.tenantService.loadCurrentTenant();
+    
+    // TODO: Fetch actual dashboard data from API filtered by tenant
+    // The backend will automatically filter by tenantId from JWT
   }
 
   getStatusColor(status: string): string {

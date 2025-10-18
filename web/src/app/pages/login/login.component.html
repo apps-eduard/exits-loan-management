@@ -1,14 +1,14 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-900 dark:to-primary-950 px-4">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-900 dark:to-primary-950 px-4 py-8">
   <div class="max-w-md w-full">
     <!-- Logo/Header -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-white mb-2">Pacifica Finance</h1>
-      <p class="text-primary-100 text-sm font-medium">Loan Management System</p>
+      <h1 class="text-4xl font-bold text-white mb-2">ExITS Finance System</h1>
+      <p class="text-primary-100 text-sm font-medium">Super Admin Portal</p>
     </div>
 
     <!-- Login Card -->
     <div class="card">
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign In</h2>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Super Admin Sign In</h2>
       
       @if (error()) {
         <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -69,12 +69,54 @@
           }
         </button>
       </form>
+
+      <!-- Quick Login (Testing Only) -->
+      <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">Quick Test Login</p>
+        <div class="grid grid-cols-3 gap-2">
+          <!-- Super Admin -->
+          <button
+            (click)="quickLogin('super-admin')"
+            type="button"
+            class="px-3 py-2 bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/30 transition-colors text-xs font-medium flex flex-col items-center gap-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <span>Super Admin</span>
+          </button>
+
+          <!-- Tenant Admin -->
+          <button
+            (click)="quickLogin('tenant-admin')"
+            type="button"
+            class="px-3 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors text-xs font-medium flex flex-col items-center gap-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <span>Tenant</span>
+          </button>
+
+          <!-- Collector -->
+          <button
+            (click)="quickLogin('collector')"
+            type="button"
+            class="px-3 py-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/30 transition-colors text-xs font-medium flex flex-col items-center gap-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span>Collector</span>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
+          ⚠️ For development testing only
+        </p>
+      </div>
     </div>
 
     <!-- Footer -->
     <div class="mt-6 text-center">
       <p class="text-sm text-primary-100">
-        © 2025 Pacifica Finance Corporation. All rights reserved.
+        © 2025 ExITS Finance System. All rights reserved.
       </p>
     </div>
   </div>

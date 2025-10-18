@@ -9,6 +9,8 @@ export interface TokenPayload {
   roleId: string;
   roleName: string;
   organizationalUnitId: string;
+  tenantId: string; // For multi-tenant isolation
+  isSuperAdmin: boolean; // Can access all tenants
 }
 
 export interface AuthTokens {
@@ -25,6 +27,8 @@ export interface UserWithRole {
   roleName: string;
   organizationalUnitId: string;
   organizationalUnitName: string;
+  tenantId: string; // For multi-tenant isolation
+  isSuperAdmin: boolean; // Can access all tenants
   status: string;
 }
 
@@ -40,6 +44,8 @@ export class AuthService {
         u.id, u.email, u.first_name, u.last_name, u.password_hash,
         u.role_id, r.name as role_name, u.status,
         u.organizational_unit_id, ou.name as organizational_unit_name,
+        u.tenant_id,
+        COALESCE(u.is_super_admin, false) as is_super_admin,
         'user' as user_type
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
@@ -57,6 +63,8 @@ export class AuthService {
           c.id, c.email, c.first_name, c.last_name, c.password_hash,
           'customer' as role_id, 'Customer' as role_name, c.status,
           c.organizational_unit_id, ou.name as organizational_unit_name,
+          c.tenant_id,
+          false as is_super_admin,
           'customer' as user_type
         FROM customers c
         INNER JOIN organizational_units ou ON c.organizational_unit_id = ou.id
@@ -109,6 +117,8 @@ export class AuthService {
       roleName: user.role_name,
       organizationalUnitId: user.organizational_unit_id,
       organizationalUnitName: user.organizational_unit_name,
+      tenantId: user.tenant_id,
+      isSuperAdmin: user.is_super_admin || false,
       status: user.status,
     };
   }
@@ -120,6 +130,8 @@ export class AuthService {
       roleId: user.roleId,
       roleName: user.roleName,
       organizationalUnitId: user.organizationalUnitId,
+      tenantId: user.tenantId,
+      isSuperAdmin: user.isSuperAdmin,
     };
 
     const accessToken = jwt.sign(payload, env.JWT_SECRET, {
@@ -151,7 +163,9 @@ export class AuthService {
       SELECT 
         u.id, u.email, u.first_name, u.last_name,
         u.role_id, r.name as role_name, u.status,
-        u.organizational_unit_id, ou.name as organizational_unit_name
+        u.organizational_unit_id, ou.name as organizational_unit_name,
+        u.tenant_id,
+        COALESCE(u.is_super_admin, false) as is_super_admin
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
       INNER JOIN organizational_units ou ON u.organizational_unit_id = ou.id
@@ -175,6 +189,8 @@ export class AuthService {
       roleName: user.role_name,
       organizationalUnitId: user.organizational_unit_id,
       organizationalUnitName: user.organizational_unit_name,
+      tenantId: user.tenant_id,
+      isSuperAdmin: user.is_super_admin || false,
       status: user.status,
     };
   }
