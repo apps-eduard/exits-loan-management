@@ -49,6 +49,7 @@ export const login = async (
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.roleName,
+          isSuperAdmin: user.isSuperAdmin,
           organizationalUnit: {
             id: user.organizationalUnitId,
             name: user.organizationalUnitName,
@@ -144,9 +145,15 @@ export const getProfile = async (
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.roleName,
+          isSuperAdmin: user.isSuperAdmin,
           organizationalUnit: {
             id: user.organizationalUnitId,
             name: user.organizationalUnitName,
+          },
+          tenant: {
+            id: user.tenantId,
+            name: user.tenantName,
+            companyName: user.tenantCompanyName,
           },
           permissions,
         },
