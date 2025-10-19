@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+main {
+  @media (min-width: 1024px) {
+    margin-left: 16rem; /* lg:ml-64 */
+  }
+}
+
+.bg-opacity-50 {
+  backdrop-filter: blur(2px);
+}

@@ -1,0 +1,277 @@
+🧠 Super Admin — Core Concept
+
+The Super Admin is the top-level operator of the entire SaaS platform, not a tenant.
+This role exists outside of any tenant’s data boundaries and controls the whole ecosystem.
+
+🎯 Core Responsibilities
+Capability	Description
+🏢 Manage Tenants	Create, suspend, or delete tenant accounts.
+💳 Manage Subscriptions	Assign features (Money Loan, BNPL, Pawnshop), set plan types (Free, Standard, Pro), and handle renewals.
+👥 Manage Tenant Admins	View or reset tenant admin credentials, verify identity, handle escalations.
+⚙️ Configure Global Settings	Set global loan parameters, default templates, system-wide interest rate policies, etc.
+📊 Platform Analytics	View total tenants, active users, usage per feature, and overall revenue trends.
+🔐 Manage Platform Roles	Add platform-level users (support agents, accountants) and control their access.
+📨 Notifications	Send announcements, maintenance alerts, or policy updates to all tenants.
+🧭 Super Admin Menu Structure (Required)
+
+A clean, scalable structure for your Angular Material sidenav, designed for clarity and expansion:
+
+🏠 Dashboard
+
+Overview of total tenants, active subscriptions, and revenue.
+
+Graphs showing tenant growth, most-used features, and monthly income.
+
+🏢 Tenants Management
+
+Tenant List — view all tenants, search, filter by status.
+
+Add Tenant — onboard a new tenant manually.
+
+Tenant Details — open a tenant to view its users, branches, features, usage stats.
+
+Suspend / Activate Tenant — toggle availability instantly.
+
+💳 Subscriptions
+
+Subscription Plans — define billing plans and their price points.
+
+Assign Features — choose which features each plan includes (Money Loan, BNPL, Pawnshop).
+
+Billing & Payments — view tenant billing history and invoices.
+
+Trial & Expiry Management — monitor subscription expirations and renewals.
+
+🧰 Features
+
+Feature Flags — central control for system-wide features (enable/disable for tenants).
+
+Feature Analytics — usage per feature type (e.g., 60% use Money Loan, 40% BNPL).
+
+👥 Users & Roles
+
+Platform Users — manage internal Super Admins, support staff, auditors.
+
+Role Management — define access scopes for internal staff.
+
+Access Logs / Audit Trail — track who changed tenant data or features.
+
+📊 Reports
+
+Tenant Activity Report — logins, feature usage, recent activity.
+
+Subscription Revenue — income by plan, by period.
+
+Feature Utilization — how many tenants are using each system.
+
+System Logs — backend audit trails and API actions.
+
+⚙️ Platform Settings
+
+Global Interest Templates — default interest or fee models across the platform.
+
+Notification Templates — standardized messages for system updates or billing alerts.
+
+System Email / SMTP Settings — configure global outbound email system.
+
+Backup & Restore — manage database or configuration backups.
+
+🔔 Announcements
+
+Compose and send global messages to all tenants.
+
+Used for downtime notices, new features, and general communication.
+
+👤 My Account
+
+Profile details.
+
+Change password.
+
+Logout button.
+
+🔐 Tenant Feature Access (Required)
+
+Each tenant record must include the following fields:
+
+Field	Example
+tenantId	1
+tenantName	ABC Lending Corp.
+isActive	true
+subscriptionPlan	Pro
+featuresEnabled	[ 'MoneyLoan', 'BNPL' ]
+startDate	2025-01-01
+expiryDate	2026-01-01
+
+These control what the tenant can access when logging in.
+
+For example:
+
+Tenant with ['MoneyLoan'] → sees only Money Loan modules.
+
+Tenant with ['MoneyLoan', 'Pawnshop'] → sees both.
+
+This filtering happens automatically in the UI and backend authorization layer.
+
+🌐 Multi-Tenant Feature Control (Required)
+
+This is a core part of the Super Admin dashboard, inside Tenant Details view.
+
+📋 Display Example
+Tenant: ABC Lending Corp.
+Status: Active
+
+[✔] Money Loan  
+[☐] Buy Now, Pay Later  
+[✔] Pawnshop  
+
+[ Save Changes ]
+
+
+When Super Admin toggles and saves:
+
+The system updates the tenant’s record.
+
+Tenant’s users immediately gain or lose access to the corresponding features.
+
+Their UI menus and backend permissions reflect this change instantly.
+
+⚡ Role Hierarchy Summary (Required)
+Level	Scope	Role	Access Responsibility
+🧠 Global	Platform-wide	Super Admin	Manages tenants, subscriptions, features, and analytics.
+👨‍💼 Tenant-level	Within one company	Tenant Admin	Manages users, branches, and system setup.
+🏢 Branch-level	Within tenant	Branch Manager / Officer / Collector / Auditor	Handles daily loan operations.
+👤 End-user	Customer	Customer	Views own loans or makes payments.
+
+
+***********************************************************************************************
+		TENANT AREA
+***********************************************************************************************
+
+Implement this please 🧩 1. Core RBAC Roles
+Here’s a recommended role hierarchy for a Money Loan SaaS system:
+
+Role Description Example Permissions
+Tenant Owner / Admin Full access to tenant settings, user management, reports Manage all users, configure loan settings, view all reports
+Branch Manager Manages one or more branches under the tenant Approve loans, manage customers, oversee collections
+Loan Officer / Encoder Handles loan applications, client onboarding Create loans, add clients, update records
+Collector / Cashier Handles payment collection, receipts, and deposits Record payments, view schedules, print receipts
+Auditor / Accountant View financial summaries, audit logs, reports only Read-only access to transactions and reports
+Customer (optional) Portal access for clients to view loan status View own loans, make online payments
+🧭 2. Tenant RBAC Menu Structure
+
+Here’s a suggested menu layout, grouped by feature area and RBAC visibility:
+
+🏠 Dashboard
+
+Visible to: All roles (summary adjusted by role)
+
+Overview of active loans, pending applications, total collections, etc.
+
+👥 Customers
+
+View Customers
+
+Add New Customer
+
+Customer Documents (ID, proof of income)
+
+Visible to: Admin, Loan Officer, Branch Manager
+
+💰 Loans
+
+Loan Applications
+
+Active Loans
+
+Loan Schedules
+
+Loan Calculator
+
+Collateral Management (for secured loans)
+
+Visible to: Admin, Loan Officer, Branch Manager
+
+📆 Collections
+
+Daily Collection List
+
+Record Payment
+
+Overdue Accounts
+
+Visible to: Collector, Branch Manager, Admin
+
+📊 Reports
+
+Loan Performance
+
+Collection Report
+
+Disbursement Report
+
+Aging of Receivables
+
+User Activity Log
+
+Visible to: Admin, Auditor, Branch Manager
+
+🏦 Accounting
+
+Chart of Accounts
+
+Journal Entries
+
+Expense Tracking
+
+Trial Balance / Income Summary
+
+Visible to: Admin, Accountant
+
+⚙️ Settings
+
+Branches
+
+Loan Products / Interest Setup
+
+User Management (assign roles)
+
+Permission Control (if tenant manages their own roles)
+
+Tenant Profile & Subscription
+
+Visible to: Tenant Admin only
+
+👤 My Account
+
+Change Password
+
+My Profile
+
+Notifications
+
+Logout
+
+Visible to: All users
+
+🔐 3. Example RBAC Matrix
+Menu Admin Branch Manager Loan Officer Collector Auditor Customer
+Dashboard ✅ ✅ ✅ ✅ ✅ ✅
+Customers ✅ ✅ ✅ ❌ ❌ ❌
+Loans ✅ ✅ ✅ ❌ ❌ ✅ (view own)
+Collections ✅ ✅ ❌ ✅ ✅ (read-only) ❌
+Reports ✅ ✅ ❌ ❌ ✅ ❌
+Accounting ✅ ❌ ❌ ❌ ✅ ❌
+Settings ✅ ❌ ❌ ❌ ❌ ❌
+My Account ✅ ✅ ✅ ✅ ✅ ✅
+⚡ 4. Multi-Tenant Considerations
+
+Each tenant (company) should have:
+
+Its own users, branches, loans, and collections data (isolated via tenant ID).
+
+Admin(s) who can manage only their tenant’s data.
+
+Customizable loan settings, interest rules, and fees.
+
+Optional custom roles per tenant (if you want more flexibility).

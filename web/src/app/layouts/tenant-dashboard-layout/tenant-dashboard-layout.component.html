@@ -1,0 +1,30 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <app-tenant-header
+    (sidebarToggle)="toggleSidebar()"
+    class="fixed top-0 left-0 right-0 z-30">
+  </app-tenant-header>
+
+  <!-- Sidebar -->
+  <app-tenant-navigation
+    [class]="'fixed top-16 left-0 z-20 h-full transition-transform duration-300 ' +
+              (isSidebarOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')"
+    class="w-64 bg-white border-r border-gray-200">
+  </app-tenant-navigation>
+
+  <!-- Main Content -->
+  <main [class]="'transition-all duration-300 pt-16 ' +
+                (isSidebarOpen() ? 'lg:ml-64' : 'lg:ml-64')">
+    <div class="p-6">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- Mobile Overlay -->
+  @if (isSidebarOpen()) {
+    <div
+      class="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+      (click)="closeSidebar()">
+    </div>
+  }
+</div>

@@ -1,0 +1,61 @@
+header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Dropdown animations */
+.absolute {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar for notifications */
+.max-h-96 {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+
+    .dark & {
+      background: #1f2937;
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+
+    &:hover {
+      background: #555;
+    }
+
+    .dark & {
+      background: #4b5563;
+
+      &:hover {
+        background: #6b7280;
+      }
+    }
+  }
+}

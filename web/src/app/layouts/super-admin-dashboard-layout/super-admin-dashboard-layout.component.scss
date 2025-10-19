@@ -1,0 +1,51 @@
+.sidebar {
+  @apply fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out;
+
+  &:not(.open) {
+    @apply -translate-x-full lg:translate-x-0;
+  }
+}
+
+main {
+  background: linear-gradient(to bottom right,
+    rgb(249 250 251) 0%,
+    rgb(243 244 246) 100%);
+
+  .dark & {
+    background: linear-gradient(to bottom right,
+      rgb(3 7 18) 0%,
+      rgb(17 24 39) 100%);
+  }
+}
+
+/* Custom scrollbar for main content */
+main {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+
+    .dark & {
+      background: #1f2937;
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+
+    &:hover {
+      background: #555;
+    }
+
+    .dark & {
+      background: #4b5563;
+
+      &:hover {
+        background: #6b7280;
+      }
+    }
+  }
+}

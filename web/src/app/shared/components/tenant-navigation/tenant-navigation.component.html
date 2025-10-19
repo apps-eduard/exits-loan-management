@@ -1,0 +1,72 @@
+<nav class="h-full bg-white shadow-lg overflow-y-auto">
+  <!-- Logo Section -->
+  <div class="p-4 border-b border-gray-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+        <span class="text-white text-sm font-bold">T</span>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">Tenant Portal</h2>
+        <p class="text-xs text-gray-500">Business Management</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <div class="py-4">
+    @for (section of menuSections; track section.title) {
+      <div class="mb-6">
+        <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+          {{section.title}}
+        </h3>
+        @for (item of section.items; track item.label) {
+          @if (hasPermission(item.permission)) {
+            <div>
+              @if (hasChildren(item)) {
+                <!-- Parent Menu Item -->
+                <button
+                  class="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200"
+                  (click)="toggleSubmenu(item.label)">
+                  <span class="mr-3 text-lg">{{item.icon}}</span>
+                  <span class="flex-1 text-left">{{item.label}}</span>
+                  <svg class="w-4 h-4 transition-transform duration-200"
+                       [class.rotate-180]="isSubmenuOpen(item.label)"
+                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <!-- Submenu -->
+                @if (isSubmenuOpen(item.label) && item.children) {
+                  <div class="ml-4 border-l-2 border-gray-200">
+                    @for (child of item.children; track child.label) {
+                      @if (hasPermission(child.permission)) {
+                        <a
+                          [routerLink]="child.route"
+                          routerLinkActive="bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                          class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200">
+                          <span class="mr-3">{{child.icon}}</span>
+                          <span>{{child.label}}</span>
+                        </a>
+                      }
+                    }
+                  </div>
+                }
+              } @else {
+                <!-- Simple Menu Item -->
+                @if (hasRoute(item)) {
+                  <a
+                    [routerLink]="item.route"
+                    routerLinkActive="bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200">
+                    <span class="mr-3 text-lg">{{item.icon}}</span>
+                    <span>{{item.label}}</span>
+                  </a>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</nav>

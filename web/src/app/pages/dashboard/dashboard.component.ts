@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TenantService } from '../../core/services/tenant.service';
-import { TenantHeaderComponent } from '../../shared/components/tenant-header/tenant-header.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 
 interface StatCard {
@@ -18,13 +17,13 @@ interface StatCard {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, TenantHeaderComponent, StatCardComponent],
+  imports: [CommonModule, RouterLink, StatCardComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private tenantService = inject(TenantService);
-  
+
   user = this.authService.getCurrentUser();
   currentTenant = this.tenantService.currentTenant;
   isSuperAdmin = this.authService.isSuperAdmin();
@@ -92,7 +91,7 @@ export class DashboardComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     // Load current tenant information
     await this.tenantService.loadCurrentTenant();
-    
+
     // TODO: Fetch actual dashboard data from API filtered by tenant
     // The backend will automatically filter by tenantId from JWT
   }

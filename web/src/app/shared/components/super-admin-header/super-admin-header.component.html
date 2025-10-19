@@ -1,0 +1,129 @@
+<header class="bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+  <div class="flex items-center justify-between px-6 py-4">
+    <!-- Left Section: Menu Toggle & Title -->
+    <div class="flex items-center space-x-4">
+      <button
+        (click)="onToggleSidebar()"
+        title="Toggle sidebar"
+        class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+        <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <div>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white">Platform Administration</h1>
+        <p class="text-xs text-gray-500 dark:text-gray-400">System-wide management & control</p>
+      </div>
+    </div>
+
+    <!-- Right Section: Theme Toggle, Notifications & Profile -->
+    <div class="flex items-center space-x-4">
+      <!-- Theme Toggle -->
+      <button
+        (click)="themeService.toggleTheme()"
+        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+        title="Toggle theme">
+        @if (themeService.isDarkMode()) {
+          <span class="text-xl">☀️</span>
+        } @else {
+          <span class="text-xl">🌙</span>
+        }
+      </button>
+
+      <!-- Notifications -->
+      <div class="relative">
+        <button
+          (click)="toggleNotifications()"
+          class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+          <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+          @if (unreadCount() > 0) {
+            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+              {{unreadCount()}}
+            </span>
+          }
+        </button>
+
+        <!-- Notifications Dropdown -->
+        @if (isNotificationsOpen) {
+          <div class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-white">Notifications</h3>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              @for (notification of notifications; track notification.id) {
+                <button
+                  (click)="markAsRead(notification.id)"
+                  class="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors duration-200"
+                  [ngClass]="{'bg-purple-50 dark:bg-purple-900/10': notification.unread}">
+                  <div class="flex items-start">
+                    @if (notification.unread) {
+                      <div class="w-2 h-2 bg-purple-600 rounded-full mt-2 mr-3"></div>
+                    }
+                    <div class="flex-1 text-left">
+                      <p class="text-sm text-gray-800 dark:text-gray-200">{{notification.message}}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{notification.time}}</p>
+                    </div>
+                  </div>
+                </button>
+              }
+            </div>
+            <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+              <button class="w-full text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+                View all notifications
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Profile Dropdown -->
+      <div class="relative">
+        <button
+          (click)="toggleProfileMenu()"
+          class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+            <span class="text-white text-sm font-semibold">{{getUserInitials()}}</span>
+          </div>
+          <div class="hidden md:block text-left">
+            <p class="text-sm font-medium text-gray-800 dark:text-white">{{getUserName()}}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{getUserRole()}}</p>
+          </div>
+          <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+
+        <!-- Profile Dropdown Menu -->
+        @if (isProfileMenuOpen) {
+          <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <p class="text-sm font-semibold text-gray-800 dark:text-white">{{getUserName()}}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{getUserRole()}}</p>
+            </div>
+            <div class="py-2">
+              <button
+                (click)="viewProfile()"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                <span class="mr-2">👤</span> My Profile
+              </button>
+              <button
+                (click)="viewSettings()"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                <span class="mr-2">⚙️</span> Settings
+              </button>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 py-2">
+              <button
+                (click)="logout()"
+                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors duration-200">
+                <span class="mr-2">🚪</span> Logout
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</header>

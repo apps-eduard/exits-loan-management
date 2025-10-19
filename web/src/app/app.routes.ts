@@ -11,28 +11,19 @@ import { superAdminGuard } from './core/guards/super-admin.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { TenantLoginComponent } from './pages/tenant-login/tenant-login.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
+import { TenantDashboardLayoutComponent } from './layouts/tenant-dashboard-layout/tenant-dashboard-layout.component';
+import { SuperAdminDashboardLayoutComponent } from './layouts/super-admin-dashboard-layout/super-admin-dashboard-layout.component';
 import { SystemRoles } from './core/services/rbac.service';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/test-dashboard',
+    redirectTo: '/tenant/dashboard',
     pathMatch: 'full'
   },
   {
     path: 'landing',
     loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
-  },
-  // Test Route (bypass auth for demo)
-  {
-    path: 'test-dashboard',
-    component: DashboardLayoutComponent,
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      }
-    ]
   },
   // Registration
   {
@@ -65,7 +56,7 @@ export const routes: Routes = [
   // Super Admin Routes (Cross-Tenant Management)
   {
     path: 'super-admin',
-    component: DashboardLayoutComponent,
+    component: SuperAdminDashboardLayoutComponent,
     canActivate: [authGuard, superAdminGuard],
     children: [
       {
@@ -95,9 +86,86 @@ export const routes: Routes = [
       }
     ]
   },
-  // Tenant Admin Routes (Standard for all tenants, tenant-scoped)
+  // Tenant Routes (New Tenant Dashboard)
+  {
+    path: 'tenant',
+    component: TenantDashboardLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/tenant/tenant-dashboard/tenant-dashboard.component').then(m => m.TenantDashboardComponent)
+      },
+      {
+        path: 'customers',
+        loadChildren: () => import('./pages/customers/customers.routes').then(m => m.CUSTOMER_ROUTES),
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['customer_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
+      },
+      {
+        path: 'loans',
+        loadChildren: () => import('./pages/loans/loans.routes').then(m => m.LOAN_ROUTES),
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['loan_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent),
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['payment_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
+      },
+      {
+        path: 'users',
+        loadChildren: () => import('./pages/users/users.routes').then(m => m.USER_ROUTES),
+        canActivate: [ManagerOrAboveGuard],
+        data: {
+          permissions: ['user_manage'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER]
+        }
+      },
+      {
+        path: 'rbac',
+        loadComponent: () => import('./features/rbac-management/rbac-management.component').then(m => m.RbacManagementComponent),
+        canActivate: [AdminOnlyGuard],
+        data: {
+          permissions: ['role_manage'],
+          roles: [SystemRoles.TENANT_ADMIN]
+        }
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent),
+        canActivate: [AdminOnlyGuard],
+        data: {
+          permissions: ['tenant_settings_manage'],
+          roles: [SystemRoles.TENANT_ADMIN]
+        }
+      }
+    ]
+  },
+  // Tenant Admin Routes (Legacy - Keep for backward compatibility)
   {
     path: 'admin',
+    redirectTo: '/tenant',
+    pathMatch: 'prefix'
+  },
+  // Old admin routes for reference (can be removed later)
+  {
+    path: 'admin-old',
     component: DashboardLayoutComponent,
     canActivate: [authGuard],
     children: [
@@ -225,11 +293,11 @@ export const routes: Routes = [
   // Legacy redirect (old /dashboard route)
   {
     path: 'dashboard',
-    redirectTo: '/admin/dashboard',
+    redirectTo: '/tenant/dashboard',
     pathMatch: 'full'
   },
   {
     path: '**',
-    redirectTo: '/admin/dashboard'
+    redirectTo: '/tenant/dashboard'
   }
 ];

@@ -6,19 +6,13 @@ import { CustomerService, Customer } from '../../../services/customer.service';
 import { LoggerService } from '../../../services/logger.service';
 import { CustomerFormDialogComponent } from '../customer-form-dialog/customer-form-dialog.component';
 import { TenantService } from '../../../core/services/tenant.service';
-import { TenantHeaderComponent } from '../../../shared/components/tenant-header/tenant-header.component';
 
 @Component({
   selector: 'app-customers-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CustomerFormDialogComponent, TenantHeaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CustomerFormDialogComponent],
   template: `
     <div class="space-y-6">
-      <!-- Tenant Header -->
-      @if (currentTenant()) {
-        <app-tenant-header [tenant]="currentTenant()!" />
-      }
-
       <div class="p-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
@@ -28,7 +22,7 @@ import { TenantHeaderComponent } from '../../../shared/components/tenant-header/
               Manage customer accounts and KYC verification for {{ currentTenant()?.company_name || 'your organization' }}
             </p>
           </div>
-        <button 
+        <button
           (click)="onAddCustomer()"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +150,7 @@ import { TenantHeaderComponent } from '../../../shared/components/tenant-header/
               </thead>
               <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 @for (customer of customers(); track customer.id) {
-                  <tr 
+                  <tr
                     [routerLink]="['/customers', customer.id]"
                     class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -328,14 +322,14 @@ export class CustomersListComponent implements OnInit {
   private customerService = inject(CustomerService);
   private logger = inject(LoggerService);
   private tenantService = inject(TenantService);
-  
+
   currentTenant = this.tenantService.currentTenant;
 
   customers = signal<Customer[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
   pagination = signal<{ page: number; limit: number; total: number; totalPages: number } | null>(null);
-  
+
   showCustomerDialog = signal(false);
   selectedCustomerId = signal<string | undefined>(undefined);
 
@@ -350,7 +344,7 @@ export class CustomersListComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     // Load tenant information
     await this.tenantService.loadCurrentTenant();
-    
+
     // Load customers (automatically filtered by tenant on backend)
     await this.loadCustomers();
   }
@@ -426,7 +420,7 @@ export class CustomersListComponent implements OnInit {
 
   deleteCustomer(customer: Customer, event: Event): void {
     event.stopPropagation();
-    
+
     if (confirm(`Are you sure you want to delete customer: ${customer.firstName} ${customer.lastName}?`)) {
       this.customerService.deleteCustomer(customer.id).subscribe({
         next: () => {
@@ -443,10 +437,10 @@ export class CustomersListComponent implements OnInit {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   }
 
@@ -472,7 +466,7 @@ export class CustomersListComponent implements OnInit {
 
   getPageNumbers(): number[] {
     if (!this.pagination()) return [];
-    
+
     const total = this.pagination()!.totalPages;
     const current = this.pagination()!.page;
     const pages: number[] = [];
