@@ -1,15 +1,38 @@
 import { Routes } from '@angular/router';
 import { authGuard, loginGuard } from './guards/auth.guard';
-import { rbacGuard } from './guards/rbac.guard';
+import {
+  RbacGuard,
+  AdminOnlyGuard,
+  ManagerOrAboveGuard,
+  StaffOnlyGuard,
+  CustomerOnlyGuard
+} from './core/guards/rbac.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { TenantLoginComponent } from './pages/tenant-login/tenant-login.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
+import { SystemRoles } from './core/services/rbac.service';
 
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: '/test-dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: 'landing',
     loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
+  },
+  // Test Route (bypass auth for demo)
+  {
+    path: 'test-dashboard',
+    component: DashboardLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      }
+    ]
   },
   // Registration
   {
@@ -90,44 +113,114 @@ export const routes: Routes = [
       {
         path: 'customers',
         loadChildren: () => import('./pages/customers/customers.routes').then(m => m.CUSTOMER_ROUTES),
-        canActivate: [rbacGuard],
-        data: { permissions: ['manage_customers', 'view_customers'] }
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['customer_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
       },
       {
         path: 'loans',
         loadChildren: () => import('./pages/loans/loans.routes').then(m => m.LOAN_ROUTES),
-        canActivate: [rbacGuard],
-        data: { permissions: ['manage_loans', 'view_loans'] }
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['loan_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
       },
       {
         path: 'payments',
         loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent),
-        canActivate: [rbacGuard],
-        data: { permissions: ['manage_payments', 'view_payments'] }
+        canActivate: [StaffOnlyGuard],
+        data: {
+          permissions: ['payment_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.LOAN_OFFICER, SystemRoles.COLLECTOR]
+        }
       },
       {
         path: 'reports',
         loadComponent: () => import('./pages/reports/reports.component').then(m => m.ReportsComponent),
-        canActivate: [rbacGuard],
-        data: { permissions: ['view_reports', 'view_analytics'] }
+        canActivate: [ManagerOrAboveGuard],
+        data: {
+          permissions: ['report_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER, SystemRoles.AUDITOR]
+        }
       },
       {
         path: 'loan-products',
         loadComponent: () => import('./pages/loan-products/loan-products.component').then(m => m.LoanProductsComponent),
-        canActivate: [rbacGuard],
-        data: { permissions: ['manage_loan_products', 'view_loan_products'] }
+        canActivate: [ManagerOrAboveGuard],
+        data: {
+          permissions: ['loan_product_view'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER]
+        }
       },
       {
         path: 'users',
         loadChildren: () => import('./pages/users/users.routes').then(m => m.USER_ROUTES),
-        canActivate: [rbacGuard],
-        data: { permissions: ['manage_users'] }
+        canActivate: [ManagerOrAboveGuard],
+        data: {
+          permissions: ['user_manage'],
+          roles: [SystemRoles.TENANT_ADMIN, SystemRoles.BRANCH_MANAGER]
+        }
+      },
+      {
+        path: 'rbac',
+        loadComponent: () => import('./features/rbac-management/rbac-management.component').then(m => m.RbacManagementComponent),
+        canActivate: [AdminOnlyGuard],
+        data: {
+          permissions: ['role_manage'],
+          roles: [SystemRoles.TENANT_ADMIN]
+        }
+      },
+      {
+        path: 'tenant-settings',
+        loadComponent: () => import('./features/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent),
+        canActivate: [AdminOnlyGuard],
+        data: {
+          permissions: ['tenant_settings_manage'],
+          roles: [SystemRoles.TENANT_ADMIN]
+        }
       },
       {
         path: 'settings',
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       }
     ]
+  },
+  // Customer Portal Routes
+  {
+    path: 'customer-portal',
+    component: DashboardLayoutComponent,
+    canActivate: [CustomerOnlyGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'my-loans',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'my-payments',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      }
+    ]
+  },
+  // Access Denied Page
+  {
+    path: 'access-denied',
+    loadComponent: () => import('./pages/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
   },
   // Legacy redirect (old /dashboard route)
   {

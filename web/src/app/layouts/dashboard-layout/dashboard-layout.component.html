@@ -1,23 +1,25 @@
+<!-- Mobile backdrop -->
+<div
+  class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 md:hidden"
+  [class.hidden]="!isSidebarOpen()"
+  (click)="toggleSidebar()">
+</div>
+
 <!-- Sidebar -->
-<aside class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col z-30">
+<aside
+  class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col z-30 transform transition-transform duration-300 ease-in-out"
+  [class.translate-x-0]="isSidebarOpen()"
+  [class.-translate-x-full]="!isSidebarOpen()">
+
   <!-- Logo -->
   <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
     <h1 class="text-lg font-bold text-primary-600 dark:text-primary-400">Pacifica Finance</h1>
   </div>
 
-  <!-- Navigation -->
-  <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-    @for (item of menuItems(); track item.path) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-      >
-        <span class="mr-3 text-lg">{{ item.icon }}</span>
-        <span>{{ item.label }}</span>
-      </a>
-    }
-  </nav>
+  <!-- RBAC Dynamic Navigation -->
+  <div class="flex-1 overflow-y-auto">
+    <app-dynamic-navigation></app-dynamic-navigation>
+  </div>
 
   <!-- User Menu -->
   <div class="p-4 border-t border-gray-200 dark:border-gray-700">
@@ -36,55 +38,12 @@
 </aside>
 
 <!-- Main Content Area -->
-<div class="ml-64 min-h-screen flex flex-col">
-  <!-- Header -->
-  <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 sticky top-0 z-20">
-    <div class="flex items-center space-x-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ pageTitle() }}</h2>
-
-      <!-- Tenant Info -->
-      @if (!isSuperAdmin() && user()?.tenant) {
-        <div class="flex items-center space-x-3 px-3 py-1 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
-            {{ getTenantInitials() }}
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user()!.tenant!.companyName }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ user()!.tenant!.name }}</p>
-          </div>
-        </div>
-      }
-    </div>
-
-    <div class="flex items-center space-x-4">
-      <!-- Theme Toggle -->
-      <button
-        (click)="toggleTheme()"
-        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        title="Toggle theme"
-      >
-        @if (isDarkMode()) {
-          <span class="text-xl">☀️</span>
-        } @else {
-          <span class="text-xl">🌙</span>
-        }
-      </button>
-
-      <!-- Notifications -->
-      <button class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative">
-        <span class="text-xl">🔔</span>
-        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-      </button>
-
-      <!-- Logout -->
-      <button
-        (click)="logout()"
-        class="btn btn-outline"
-      >
-        Logout
-      </button>
-    </div>
-  </header>
+<div
+  class="min-h-screen flex flex-col transition-all duration-300 ease-in-out"
+  [class.ml-64]="isSidebarOpen()"
+  [class.ml-0]="!isSidebarOpen()">
+  <!-- RBAC Role-Based Header -->
+  <app-role-based-header (sidebarToggle)="toggleSidebar()"></app-role-based-header>
 
   <!-- Page Content -->
   <main class="flex-1 p-6 bg-gray-50 dark:bg-gray-900">

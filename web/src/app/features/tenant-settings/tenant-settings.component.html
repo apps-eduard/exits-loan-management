@@ -1,0 +1,292 @@
+<!-- Tenant Settings Component Template -->
+<div class="tenant-settings-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <!-- Message Display -->
+  <div *ngIf="message" class="message-container" [class]="'message-' + messageType">
+    <div class="message-content">
+      <i class="material-icons">
+        {{ messageType === 'success' ? 'check_circle' : messageType === 'error' ? 'error' : 'info' }}
+      </i>
+      <span>{{ message }}</span>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="settings-header">
+    <h1>🏢 Tenant Settings</h1>
+    <p>Configure your organization's settings and preferences</p>
+  </div>
+
+  <!-- Settings Forms -->
+  <div class="settings-content">
+
+    <!-- Company Information -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>🏢 Company Information</h2>
+        <p>Basic company details and regional settings</p>
+      </div>
+
+      <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()" class="settings-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="company_name">Company Name</label>
+            <input
+              id="company_name"
+              type="text"
+              formControlName="company_name"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(companyForm, 'company_name')"
+            >
+            <div *ngIf="isFieldInvalid(companyForm, 'company_name')" class="error-message">
+              {{ getFieldError(companyForm, 'company_name') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="timezone">Timezone</label>
+            <select
+              id="timezone"
+              formControlName="timezone"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(companyForm, 'timezone')"
+            >
+              <option *ngFor="let tz of timezones" [value]="tz.code">{{ tz.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="currency">Currency</label>
+            <select
+              id="currency"
+              formControlName="currency"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(companyForm, 'currency')"
+            >
+              <option *ngFor="let curr of currencies" [value]="curr.code">{{ curr.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="locale">Locale</label>
+            <input
+              id="locale"
+              type="text"
+              formControlName="locale"
+              class="form-control"
+              placeholder="e.g., en-US"
+              [class.invalid]="isFieldInvalid(companyForm, 'locale')"
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="companyForm.invalid || isLoading">
+          <i class="material-icons">save</i>
+          Update Company Info
+        </button>
+      </form>
+    </div>
+
+    <!-- Branding Settings -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>🎨 Branding</h2>
+        <p>Customize your application's appearance</p>
+      </div>
+
+      <form [formGroup]="brandingForm" (ngSubmit)="updateBranding()" class="settings-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="primary_color">Primary Color</label>
+            <div class="color-input-group">
+              <input
+                id="primary_color"
+                type="color"
+                formControlName="primary_color"
+                class="color-input"
+                (change)="onPrimaryColorChange($event)"
+              >
+              <input
+                type="text"
+                formControlName="primary_color"
+                class="form-control color-text"
+                placeholder="#3B82F6"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="secondary_color">Secondary Color</label>
+            <div class="color-input-group">
+              <input
+                id="secondary_color"
+                type="color"
+                formControlName="secondary_color"
+                class="color-input"
+                (change)="onSecondaryColorChange($event)"
+              >
+              <input
+                type="text"
+                formControlName="secondary_color"
+                class="form-control color-text"
+                placeholder="#6B7280"
+              >
+            </div>
+          </div>
+
+          <div class="form-group span-full">
+            <label for="company_logo_url">Logo URL</label>
+            <input
+              id="company_logo_url"
+              type="url"
+              formControlName="company_logo_url"
+              class="form-control"
+              placeholder="https://example.com/logo.png"
+            >
+          </div>
+        </div>
+
+        <div class="color-preview">
+          <h4>Preview:</h4>
+          <div class="preview-card">
+            <div class="preview-header" [style.background-color]="brandingForm.value.primary_color">
+              <h5>Sample Header</h5>
+            </div>
+            <div class="preview-content">
+              <p>This is how your branding will look.</p>
+              <button type="button" class="preview-button" [style.background-color]="brandingForm.value.secondary_color">
+                Sample Button
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="brandingForm.invalid || isLoading">
+          <i class="material-icons">palette</i>
+          Update Branding
+        </button>
+      </form>
+    </div>
+
+    <!-- Loan Defaults -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>💰 Loan Defaults</h2>
+        <p>Set default values for loan products</p>
+      </div>
+
+      <form [formGroup]="loanDefaultsForm" (ngSubmit)="updateLoanDefaults()" class="settings-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="default_interest_rate">Default Interest Rate (%)</label>
+            <input
+              id="default_interest_rate"
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              formControlName="default_interest_rate"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'default_interest_rate')"
+            >
+            <div *ngIf="isFieldInvalid(loanDefaultsForm, 'default_interest_rate')" class="error-message">
+              {{ getFieldError(loanDefaultsForm, 'default_interest_rate') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="default_term_months">Default Term (Months)</label>
+            <input
+              id="default_term_months"
+              type="number"
+              min="1"
+              max="360"
+              formControlName="default_term_months"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'default_term_months')"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="min_loan_amount">Minimum Loan Amount</label>
+            <input
+              id="min_loan_amount"
+              type="number"
+              min="1"
+              formControlName="min_loan_amount"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'min_loan_amount')"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="max_loan_amount">Maximum Loan Amount</label>
+            <input
+              id="max_loan_amount"
+              type="number"
+              min="1"
+              formControlName="max_loan_amount"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'max_loan_amount')"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="late_fee_percentage">Late Fee (%)</label>
+            <input
+              id="late_fee_percentage"
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              formControlName="late_fee_percentage"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'late_fee_percentage')"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="grace_period_days">Grace Period (Days)</label>
+            <input
+              id="grace_period_days"
+              type="number"
+              min="0"
+              max="30"
+              formControlName="grace_period_days"
+              class="form-control"
+              [class.invalid]="isFieldInvalid(loanDefaultsForm, 'grace_period_days')"
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="loanDefaultsForm.invalid || isLoading">
+          <i class="material-icons">savings</i>
+          Update Loan Defaults
+        </button>
+      </form>
+    </div>
+
+    <!-- Actions -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>⚙️ Actions</h2>
+        <p>Reset settings or perform bulk operations</p>
+      </div>
+
+      <div class="actions-grid">
+        <button class="btn btn-warning" (click)="resetToDefaults()" [disabled]="isLoading">
+          <i class="material-icons">restore</i>
+          Reset to Defaults
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

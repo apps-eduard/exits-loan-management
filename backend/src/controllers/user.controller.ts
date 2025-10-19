@@ -24,6 +24,7 @@ export class UserController {
         status: status as string,
         page: parseInt(page as string),
         limit: parseInt(limit as string),
+        tenantId: (req as any).user?.tenantId, // Add tenant isolation
       };
 
       const result = await userService.getUsers(filters);
@@ -40,7 +41,8 @@ export class UserController {
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const user = await userService.getUserById(id);
+      const tenantId = (req as any).user?.tenantId;
+      const user = await userService.getUserById(id, tenantId);
 
       res.status(StatusCodes.OK).json({
         success: true,

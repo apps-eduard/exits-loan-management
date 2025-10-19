@@ -4,6 +4,8 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { DynamicNavigationComponent } from '../../shared/components/dynamic-navigation/dynamic-navigation.component';
+import { RoleBasedHeaderComponent } from '../../shared/components/role-based-header/role-based-header.component';
 
 interface MenuItem {
   label: string;
@@ -15,7 +17,12 @@ interface MenuItem {
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    DynamicNavigationComponent,
+    RoleBasedHeaderComponent
+  ],
   templateUrl: './dashboard-layout.component.html'
 })
 export class DashboardLayoutComponent {
@@ -27,6 +34,9 @@ export class DashboardLayoutComponent {
   isDarkMode = this.themeService.isDarkMode;
   pageTitle = signal('Dashboard');
   isSuperAdmin = computed(() => this.authService.isSuperAdmin());
+
+  // Sidebar toggle state
+  isSidebarOpen = signal(true);
 
   // Super Admin menu items
   superAdminMenuItems: MenuItem[] = [
@@ -44,6 +54,8 @@ export class DashboardLayoutComponent {
     { label: 'Reports', path: '/admin/reports', icon: '📈', permission: 'reports.view' },
     { label: 'Loan Products', path: '/admin/loan-products', icon: '📦' },
     { label: 'Users', path: '/admin/users', icon: '👤', permission: 'users.read' },
+    { label: 'Role Management', path: '/admin/rbac', icon: '🔐', permission: 'users.manage' },
+    { label: 'Tenant Settings', path: '/admin/tenant-settings', icon: '🏢', permission: 'tenant.update' },
     { label: 'Settings', path: '/admin/settings', icon: '⚙️', permission: 'settings.read' },
   ];
 
@@ -56,6 +68,11 @@ export class DashboardLayoutComponent {
   });
 
   constructor() {
+    // Set mock user for demo (only if no user exists)
+    if (!this.authService.getCurrentUser()) {
+      (this.authService as any).setMockUser();
+    }
+
     // Update page title on route change
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -90,6 +107,10 @@ export class DashboardLayoutComponent {
       return words[0].substring(0, 2).toUpperCase();
     }
     return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen.set(!this.isSidebarOpen());
   }
 
   logout(): void {

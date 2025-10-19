@@ -16,7 +16,7 @@ export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api';
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
-  
+
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -174,5 +174,29 @@ export class AuthService {
       userPermissions: this.getCurrentUser()?.permissions || []
     });
     return result;
+  }
+
+  // Temporary method for demo/testing - SET MOCK USER
+  setMockUser(): void {
+    const mockUser: User = {
+      id: 'demo-user-1',
+      email: 'admin@pacifica.demo',
+      firstName: 'John',
+      lastName: 'Doe',
+      role: 'tenant_admin',
+      organizationalUnit: {
+        id: 'main-branch',
+        name: 'Main Branch'
+      },
+      tenant: {
+        id: 'demo-tenant-123',
+        name: 'pacifica',
+        companyName: 'Pacifica Finance'
+      },
+      isSuperAdmin: false,
+      permissions: ['*']
+    };
+    this.currentUserSubject.next(mockUser);
+    this.logger.info('🧪 Mock user set for demo purposes', mockUser);
   }
 }

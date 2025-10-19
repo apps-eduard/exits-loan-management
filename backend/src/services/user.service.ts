@@ -30,6 +30,7 @@ export interface UserFilters {
   status?: string;
   page?: number;
   limit?: number;
+  tenantId?: string;
 }
 
 export class UserService {
@@ -65,6 +66,13 @@ export class UserService {
     if (filters.status) {
       whereConditions.push(`u.status = $${paramIndex}`);
       params.push(filters.status);
+      paramIndex++;
+    }
+
+    // CRITICAL: Always filter by tenant_id for multi-tenant isolation
+    if (filters.tenantId) {
+      whereConditions.push(`u.tenant_id = $${paramIndex}`);
+      params.push(filters.tenantId);
       paramIndex++;
     }
 
@@ -114,7 +122,16 @@ export class UserService {
     return { users, total };
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string, tenantId?: string) {
+    const whereConditions = ["u.id = $1"];
+    const params = [id];
+    
+    // Add tenant isolation if tenantId provided
+    if (tenantId) {
+      whereConditions.push("u.tenant_id = $2");
+      params.push(tenantId);
+    }
+    
     const result = await pool.query(
       `
       SELECT 
@@ -122,13 +139,13 @@ export class UserService {
         u.role_id, u.organizational_unit_id, u.status,
         u.last_login_at, u.created_at, u.updated_at,
         r.id as role_id, r.name as role_name, r.description as role_description, r.is_default as role_is_default,
-        ou.id as ou_id, ou.name as ou_name, ou.code as ou_code, ou.type as ou_type, ou.description as ou_description
+        ou.id as ou_id, ou.name as ou_name, ou.code as ou_code, ou.type as ou_description
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
       INNER JOIN organizational_units ou ON u.organizational_unit_id = ou.id
-      WHERE u.id = $1
+      WHERE ${whereConditions.join(' AND ')}
     `,
-      [id]
+      params
     );
 
     if (result.rows.length === 0) {
@@ -140,11 +157,11 @@ export class UserService {
     // Get user permissions
     const permissionsResult = await pool.query(
       `
-      SELECT DISTINCT p.id, p.name, p.description, p.resource, p.action
+      SELECT DISTINCT p.id, p.key, p.description
       FROM permissions p
       INNER JOIN role_permissions rp ON p.id = rp.permission_id
       WHERE rp.role_id = $1
-      ORDER BY p.resource, p.action
+      ORDER BY p.key
     `,
       [row.role_id]
     );
@@ -173,10 +190,8 @@ export class UserService {
       status: row.status,
       permissions: permissionsResult.rows.map((p) => ({
         id: p.id,
-        name: p.name,
+        key: p.key,
         description: p.description,
-        resource: p.resource,
-        action: p.action,
       })),
       lastLoginAt: row.last_login_at,
       createdAt: row.created_at,
@@ -286,9 +301,32 @@ export class UserService {
     }
 
     if (userData.organizationalUnitId !== undefined) {
-      updates.push(`organizational_unit_id = $${paramIndex}`);
-      params.push(userData.organizationalUnitId);
-      paramIndex++;
+      // Auto-assign Head Office organizational unit (same logic as createUser)
+      // First find the user's tenant_id
+      const userQuery = await pool.query("SELECT tenant_id FROM users WHERE id = $1", [id]);
+      const tenantId = userQuery.rows[0]?.tenant_id;
+      
+      if (tenantId) {
+        // Find tenant's Head Office OU
+        const headOfficeQuery = `
+          SELECT id FROM organizational_units 
+          WHERE tenant_id = $1 AND name = 'Head Office' 
+          LIMIT 1
+        `;
+        const headOfficeResult = await pool.query(headOfficeQuery, [tenantId]);
+        
+        if (headOfficeResult.rows.length > 0) {
+          const headOfficeId = headOfficeResult.rows[0].id;
+          updates.push(`organizational_unit_id = $${paramIndex}`);
+          params.push(headOfficeId);
+          console.log(`🏢 Auto-assigned Head Office OU: ${headOfficeId} for tenant: ${tenantId} during user update`);
+          paramIndex++;
+        } else {
+          throw new HttpException(StatusCodes.BAD_REQUEST, "No Head Office organizational unit found for tenant");
+        }
+      } else {
+        throw new HttpException(StatusCodes.NOT_FOUND, "User tenant not found");
+      }
     }
 
     if (userData.status !== undefined) {
@@ -384,21 +422,19 @@ export class UserService {
   async getRolePermissions(roleId: string) {
     const result = await pool.query(
       `
-      SELECT DISTINCT p.id, p.name, p.description, p.resource, p.action
+      SELECT DISTINCT p.id, p.key, p.description
       FROM permissions p
       INNER JOIN role_permissions rp ON p.id = rp.permission_id
       WHERE rp.role_id = $1
-      ORDER BY p.resource, p.action
+      ORDER BY p.key
     `,
       [roleId]
     );
 
     return result.rows.map((row) => ({
       id: row.id,
-      name: row.name,
+      key: row.key,
       description: row.description,
-      resource: row.resource,
-      action: row.action,
     }));
   }
 
