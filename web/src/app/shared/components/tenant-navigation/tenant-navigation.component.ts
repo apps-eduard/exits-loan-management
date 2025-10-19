@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { ThemeService } from '../../../services/theme.service';
 
 interface MenuItem {
   label: string;
@@ -19,6 +20,7 @@ interface MenuItem {
 })
 export class TenantNavigationComponent {
   private router = inject(Router);
+  public themeService = inject(ThemeService);
   private openSubmenus = new Set<string>();
 
   menuSections = [
