@@ -11,6 +11,9 @@ type MigrationBuilder = {
 export const shorthands = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
+  // Drop table if it exists (for idempotency)
+  pgm.sql('DROP TABLE IF EXISTS tenant_settings CASCADE;');
+  
   // Create tenant_settings table for flexible tenant configuration
   pgm.createTable('tenant_settings', {
     id: {

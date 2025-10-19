@@ -124,13 +124,13 @@ export async function up(pgm: any): Promise<void> {
     `);
   }
 
-  // Insert new enhanced RBAC roles
+  // Insert new enhanced RBAC roles (use name-based conflict checking)
   await pgm.sql(`
-    INSERT INTO roles (id, name, description, level, is_system) VALUES
-    ('role-tenant-admin', 'Tenant Admin', 'Full access to tenant settings, user management, reports', 2, true),
-    ('role-branch-manager', 'Branch Manager', 'Manages one or more branches under the tenant', 3, true),
-    ('role-auditor', 'Auditor', 'View financial summaries, audit logs, reports only', 4, true)
-    ON CONFLICT (id) DO UPDATE SET
+    INSERT INTO roles (name, description, level, is_system) VALUES
+    ('Tenant Admin', 'Full access to tenant settings, user management, reports', 2, true),
+    ('Branch Manager', 'Manages one or more branches under the tenant', 3, true),
+    ('Auditor', 'View financial summaries, audit logs, reports only', 4, true)
+    ON CONFLICT (name) DO UPDATE SET
       description = EXCLUDED.description,
       level = EXCLUDED.level,
       is_system = EXCLUDED.is_system
@@ -138,24 +138,24 @@ export async function up(pgm: any): Promise<void> {
 
   // Insert additional permissions for enhanced RBAC
   await pgm.sql(`
-    INSERT INTO permissions (id, key, description, module, action) VALUES
-    ('perm-dashboard-read', 'dashboard.read', 'View dashboard and analytics', 'dashboard', 'read'),
-    ('perm-collections-read', 'collections.read', 'View collection schedules and reports', 'collections', 'read'),
-    ('perm-collections-create', 'collections.create', 'Record new collections', 'collections', 'create'),
-    ('perm-collections-update', 'collections.update', 'Update collection records', 'collections', 'update'),
-    ('perm-accounting-read', 'accounting.read', 'View accounting records and reports', 'accounting', 'read'),
-    ('perm-accounting-create', 'accounting.create', 'Create journal entries', 'accounting', 'create'),
-    ('perm-accounting-update', 'accounting.update', 'Update accounting records', 'accounting', 'update'),
-    ('perm-branches-read', 'branches.read', 'View branch information', 'branches', 'read'),
-    ('perm-branches-create', 'branches.create', 'Create new branches', 'branches', 'create'),
-    ('perm-branches-update', 'branches.update', 'Update branch information', 'branches', 'update'),
-    ('perm-branches-delete', 'branches.delete', 'Delete branches', 'branches', 'delete'),
-    ('perm-tenant-read', 'tenant.read', 'View tenant information', 'tenant', 'read'),
-    ('perm-tenant-update', 'tenant.update', 'Update tenant settings', 'tenant', 'update'),
-    ('perm-reports-export', 'reports.export', 'Export reports to various formats', 'reports', 'export'),
-    ('perm-system-manage', 'system.manage', 'Full system administration', 'system', 'manage'),
-    ('perm-loans-approve', 'loans.approve', 'Approve loan applications', 'loans', 'approve'),
-    ('perm-loans-reject', 'loans.reject', 'Reject loan applications', 'loans', 'reject')
+    INSERT INTO permissions (key, description, module, action) VALUES
+    ('dashboard.read', 'View dashboard and analytics', 'dashboard', 'read'),
+    ('collections.read', 'View collection schedules and reports', 'collections', 'read'),
+    ('collections.create', 'Record new collections', 'collections', 'create'),
+    ('collections.update', 'Update collection records', 'collections', 'update'),
+    ('accounting.read', 'View accounting records and reports', 'accounting', 'read'),
+    ('accounting.create', 'Create journal entries', 'accounting', 'create'),
+    ('accounting.update', 'Update accounting records', 'accounting', 'update'),
+    ('branches.read', 'View branch information', 'branches', 'read'),
+    ('branches.create', 'Create new branches', 'branches', 'create'),
+    ('branches.update', 'Update branch information', 'branches', 'update'),
+    ('branches.delete', 'Delete branches', 'branches', 'delete'),
+    ('tenant.read', 'View tenant information', 'tenant', 'read'),
+    ('tenant.update', 'Update tenant settings', 'tenant', 'update'),
+    ('reports.export', 'Export reports to various formats', 'reports', 'export'),
+    ('system.manage', 'Full system administration', 'system', 'manage'),
+    ('loans.approve', 'Approve loan applications', 'loans', 'approve'),
+    ('loans.reject', 'Reject loan applications', 'loans', 'reject')
     ON CONFLICT (key) DO UPDATE SET
       description = EXCLUDED.description,
       module = EXCLUDED.module,
@@ -165,18 +165,20 @@ export async function up(pgm: any): Promise<void> {
   // Assign permissions to Tenant Admin role
   await pgm.sql(`
     INSERT INTO role_permissions (role_id, permission_id)
-    SELECT 'role-tenant-admin', p.id 
-    FROM permissions p 
-    WHERE p.key != 'system.manage'
+    SELECT r.id, p.id 
+    FROM roles r
+    CROSS JOIN permissions p 
+    WHERE r.name = 'Tenant Admin' AND p.key != 'system.manage'
     ON CONFLICT (role_id, permission_id) DO NOTHING
   `);
 
   // Assign permissions to Branch Manager role
   await pgm.sql(`
     INSERT INTO role_permissions (role_id, permission_id)
-    SELECT 'role-branch-manager', p.id 
-    FROM permissions p 
-    WHERE p.key IN (
+    SELECT r.id, p.id 
+    FROM roles r
+    CROSS JOIN permissions p 
+    WHERE r.name = 'Branch Manager' AND p.key IN (
       'dashboard.read', 'customers.read', 'customers.create', 'customers.update',
       'loans.read', 'loans.create', 'loans.update', 'loans.approve', 'loans.reject',
       'collections.read', 'collections.create', 'collections.update',
@@ -189,9 +191,10 @@ export async function up(pgm: any): Promise<void> {
   // Assign permissions to Auditor role
   await pgm.sql(`
     INSERT INTO role_permissions (role_id, permission_id)
-    SELECT 'role-auditor', p.id 
-    FROM permissions p 
-    WHERE p.key IN (
+    SELECT r.id, p.id 
+    FROM roles r
+    CROSS JOIN permissions p 
+    WHERE r.name = 'Auditor' AND p.key IN (
       'dashboard.read', 'reports.read', 'reports.export', 
       'accounting.read', 'loans.read', 'payments.read', 'collections.read'
     )
