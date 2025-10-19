@@ -4,14 +4,54 @@
 
 .min-h-screen {
   min-height: 100vh;
+  background: linear-gradient(to bottom right,
+    rgb(249 250 251) 0%,
+    rgb(243 244 246) 100%);
+
+  .dark & {
+    background: linear-gradient(to bottom right,
+      rgb(3 7 18) 0%,
+      rgb(17 24 39) 100%);
+  }
 }
 
 main {
   @media (min-width: 1024px) {
     margin-left: 16rem; /* lg:ml-64 */
   }
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+
+    .dark & {
+      background: #1f2937;
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+
+    &:hover {
+      background: #555;
+    }
+
+    .dark & {
+      background: #4b5563;
+
+      &:hover {
+        background: #6b7280;
+      }
+    }
+  }
 }
 
 .bg-opacity-50 {
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }

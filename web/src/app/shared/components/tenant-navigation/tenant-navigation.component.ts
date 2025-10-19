@@ -9,6 +9,7 @@ interface MenuItem {
   route?: string;
   children?: MenuItem[];
   permission?: string;
+  badge?: string;
 }
 
 @Component({

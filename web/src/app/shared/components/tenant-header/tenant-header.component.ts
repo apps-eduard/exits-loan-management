@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-tenant-header',
@@ -15,6 +16,7 @@ export class TenantHeaderComponent {
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  public themeService = inject(ThemeService);
 
   isUserMenuOpen = false;
 
