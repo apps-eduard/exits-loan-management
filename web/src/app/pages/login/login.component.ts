@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoggerService } from '../../services/logger.service';
+import { TenantService, TenantForTesting, TenantUser } from '../../services/tenant.service';
 
 @Component({
   selector: 'app-login',
@@ -11,19 +12,56 @@ import { LoggerService } from '../../services/logger.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
   private logger = inject(LoggerService);
+  private tenantService = inject(TenantService);
 
   isLoading = signal(false);
   error = signal<string | null>(null);
+  tenants = signal<TenantForTesting[]>([]);
+  selectedTenant = signal<TenantForTesting | null>(null);
+  selectedUser = signal<TenantUser | null>(null);
 
   loginForm: FormGroup = this.fb.group({
     email: ['admin@pacifica.ph', [Validators.required, Validators.email]],
     password: ['ChangeMe123!', Validators.required]
   });
+
+  ngOnInit(): void {
+    this.loadTenants();
+  }
+
+  loadTenants(): void {
+    this.tenantService.getTenantsForTesting().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.tenants.set(response.data.tenants);
+          this.logger.info(`📋 Loaded ${response.data.tenants.length} tenants for testing`);
+        }
+      },
+      error: (err) => {
+        this.logger.error('Failed to load tenants for testing', err);
+      }
+    });
+  }
+
+  onTenantSelect(tenant: TenantForTesting): void {
+    this.selectedTenant.set(tenant);
+    this.selectedUser.set(null);
+    this.logger.info(`🏢 Selected tenant: ${tenant.companyName}`);
+  }
+
+  onUserSelect(user: TenantUser): void {
+    this.selectedUser.set(user);
+    this.loginForm.patchValue({
+      email: user.email,
+      password: '11223344' // Standard password for all registered users
+    });
+    this.logger.info(`👤 Selected user: ${user.email} (${user.role})`);
+  }
 
   /**
    * Quick login for testing - fills credentials and submits

@@ -13,6 +13,9 @@ const tenantController = new TenantController();
 // Public tenant registration
 router.post('/tenants/register', tenantController.registerTenant);
 
+// Get tenants with users for testing (public endpoint)
+router.get('/tenants/testing', tenantController.getTenantsForTesting);
+
 /**
  * Protected Routes - Authentication required
  */
@@ -29,6 +32,9 @@ router.get('/super-admin/tenants', requireSuperAdmin, tenantController.getAllTen
 
 // Create new tenant (Super Admin only)
 router.post('/super-admin/tenants', requireSuperAdmin, tenantController.createTenant);
+
+// Update tenant (Super Admin only)
+router.put('/super-admin/tenants/:id', requireSuperAdmin, tenantController.updateTenant);
 
 // Delete tenant (Super Admin only)
 router.delete('/super-admin/tenants/:id', requireSuperAdmin, tenantController.deleteTenant);

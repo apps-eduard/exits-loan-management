@@ -52,7 +52,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       next_payment_due DATE,
       
       -- Assignment
-      branch_id UUID REFERENCES branches(id),
+      branch_id UUID,
       assigned_collector UUID REFERENCES users(id),
       sales_person VARCHAR(255),
       

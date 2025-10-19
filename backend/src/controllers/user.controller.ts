@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.service";
 import { StatusCodes } from "http-status-codes";
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
 const userService = new UserService();
 
@@ -50,9 +51,15 @@ export class UserController {
     }
   }
 
-  async createUser(req: Request, res: Response, next: NextFunction) {
+  async createUser(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const userData = req.body;
+      
+      // Automatically set tenant_id from the authenticated user (unless super admin)
+      if (req.user && !req.user.isSuperAdmin) {
+        userData.tenant_id = req.user.tenantId;
+      }
+      
       const user = await userService.createUser(userData);
 
       res.status(StatusCodes.CREATED).json({
@@ -175,6 +182,19 @@ export class UserController {
       res.status(StatusCodes.OK).json({
         success: true,
         data: { permissions },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrganizationalUnits(req: Request, res: Response, next: NextFunction) {
+    try {
+      const organizationalUnits = await userService.getOrganizationalUnits();
+
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: { organizationalUnits },
       });
     } catch (error) {
       next(error);

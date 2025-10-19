@@ -8,6 +8,12 @@ export interface User {
     id: string;
     name: string;
   };
+  tenant: {
+    id: string;
+    name: string;
+    companyName: string;
+  };
+  isSuperAdmin: boolean;
   permissions: string[];
 }
 

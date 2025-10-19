@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-tenant-details',
@@ -13,7 +14,7 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-          <button 
+          <button
             (click)="goBack()"
             class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,9 +30,9 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
             </p>
           </div>
         </div>
-        
+
         @if (!isEditing()) {
-          <button 
+          <button
             (click)="toggleEdit()"
             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,12 +42,12 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
           </button>
         } @else {
           <div class="flex gap-2">
-            <button 
+            <button
               (click)="cancelEdit()"
               class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium rounded-lg transition">
               Cancel
             </button>
-            <button 
+            <button
               (click)="saveTenant()"
               [disabled]="!tenantForm.valid || isSaving()"
               class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition">
@@ -282,6 +283,7 @@ export class TenantDetailsComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private tenantService = inject(TenantService);
+  private toastService = inject(ToastService);
 
   tenant = signal<Tenant | null>(null);
   loading = signal(true);
@@ -357,9 +359,9 @@ export class TenantDetailsComponent implements OnInit {
       await this.tenantService.updateTenant(this.tenant()!.id, updates);
       await this.loadTenant();
       this.isEditing.set(false);
-      alert('Tenant updated successfully!');
+      this.toastService.success('Tenant updated successfully!');
     } catch (err: any) {
-      alert('Failed to update tenant: ' + (err.message || 'Unknown error'));
+      this.toastService.error('Failed to update tenant: ' + (err.message || 'Unknown error'));
     } finally {
       this.isSaving.set(false);
     }
@@ -383,25 +385,25 @@ export class TenantDetailsComponent implements OnInit {
 
     const confirmName = prompt(`Type "${this.tenant()!.company_name}" to confirm deletion:`);
     if (confirmName !== this.tenant()!.company_name) {
-      alert('Tenant name does not match. Deletion cancelled.');
+      this.toastService.warning('Tenant name does not match. Deletion cancelled.');
       return;
     }
 
     try {
       await this.tenantService.deleteTenant(this.tenant()!.id);
-      alert('Tenant deleted successfully');
+      this.toastService.success('Tenant deleted successfully');
       this.router.navigate(['/super-admin/tenants']);
     } catch (err: any) {
-      alert('Failed to delete tenant: ' + (err.message || 'Unknown error'));
+      this.toastService.error('Failed to delete tenant: ' + (err.message || 'Unknown error'));
     }
   }
 
   formatDate(dateString?: Date | string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'

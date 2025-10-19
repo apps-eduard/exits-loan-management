@@ -116,48 +116,50 @@ if (Test-CommandExists "psql") {
 if (Test-CommandExists "ionic") {
     Write-Success "Ionic CLI is installed"
 } else {
-    Write-Info "Ionic CLI is NOT installed. Installing globally..."
-    npm install -g @ionic/cli
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Ionic CLI installed successfully"
-    } else {
-        Write-ErrorMsg "Failed to install Ionic CLI"
-        exit 1
-    }
+    Write-Info "Ionic CLI is NOT installed (optional - needed for mobile apps)"
+    Write-Info "To install later, run: npm install -g @ionic/cli"
 }
 
 # Check Angular CLI
 if (Test-CommandExists "ng") {
     Write-Success "Angular CLI is installed"
 } else {
-    Write-Info "Angular CLI is NOT installed. Installing globally..."
-    npm install -g @angular/cli
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Angular CLI installed successfully"
-    } else {
-        Write-ErrorMsg "Failed to install Angular CLI"
-        exit 1
-    }
+    Write-Info "Angular CLI is NOT installed (optional - needed for web app)"
+    Write-Info "To install later, run: npm install -g @angular/cli"
 }
 
 Write-Section "Step 2: Database Configuration"
 
-# Prompt for database credentials
-Write-Host "Please enter your PostgreSQL database credentials:" -ForegroundColor Cyan
-$dbHost = Read-Host "Database Host (default: localhost)"
-if ([string]::IsNullOrWhiteSpace($dbHost)) { $dbHost = "localhost" }
+# Check if .env file already exists
+$envPath = Join-Path $ScriptDir "backend\.env"
+$dbHost = "localhost"
+$dbPort = "5432"
+$dbUser = "postgres"
+$dbPasswordPlain = "admin"
+$dbName = "exits_loans_db"
 
-$dbPort = Read-Host "Database Port (default: 5432)"
-if ([string]::IsNullOrWhiteSpace($dbPort)) { $dbPort = "5432" }
-
-$dbUser = Read-Host "Database User (default: postgres)"
-if ([string]::IsNullOrWhiteSpace($dbUser)) { $dbUser = "postgres" }
-
-$dbPassword = Read-Host "Database Password" -AsSecureString
-$dbPasswordPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($dbPassword))
-
-$dbName = Read-Host "Database Name (default: exits_loans_db)"
-if ([string]::IsNullOrWhiteSpace($dbName)) { $dbName = "exits_loans_db" }
+if (Test-Path $envPath) {
+    Write-Info "Found existing .env file, reading database configuration..."
+    $envContent = Get-Content $envPath
+    foreach ($line in $envContent) {
+        if ($line -match '^DATABASE_URL=postgres://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)$') {
+            $dbUser = $matches[1]
+            $dbPasswordPlain = $matches[2]
+            $dbHost = $matches[3]
+            $dbPort = $matches[4]
+            $dbName = $matches[5]
+            Write-Success "Using existing database configuration"
+            break
+        }
+    }
+} else {
+    Write-Info "Using default database configuration:"
+    Write-Host "  Host: $dbHost" -ForegroundColor Gray
+    Write-Host "  Port: $dbPort" -ForegroundColor Gray
+    Write-Host "  User: $dbUser" -ForegroundColor Gray
+    Write-Host "  Database: $dbName" -ForegroundColor Gray
+    Write-Host "  Password: admin (default)" -ForegroundColor Gray
+}
 
 Write-Info "Testing database connection..."
 
@@ -172,10 +174,11 @@ if ($LASTEXITCODE -eq 0) {
     Write-ErrorMsg "Failed to connect to PostgreSQL"
     Write-ErrorMsg "Error: $testConnection"
     Write-Info "Please check your credentials and ensure PostgreSQL is running"
+    Write-Info "Default credentials: postgres/admin@localhost:5432"
     exit 1
 }
 
-Write-Section "Step 3: Creating Database"
+Write-Section "Step 3: Verifying Database"
 
 # Check if database exists
 $env:PGPASSWORD = $dbPasswordPlain
@@ -183,20 +186,7 @@ $dbExists = psql -h $dbHost -p $dbPort -U $dbUser -d postgres -t -c "SELECT 1 FR
 $env:PGPASSWORD = $null
 
 if ($dbExists -match "1") {
-    Write-Info "Database '$dbName' already exists"
-    $overwrite = Read-Host "Do you want to DROP and recreate it? (yes/no)"
-    if ($overwrite -eq "yes") {
-        Write-Info "Dropping existing database..."
-        $env:PGPASSWORD = $dbPasswordPlain
-        psql -h $dbHost -p $dbPort -U $dbUser -d postgres -c "DROP DATABASE IF EXISTS $dbName;"
-        $env:PGPASSWORD = $null
-        
-        Write-Info "Creating new database..."
-        $env:PGPASSWORD = $dbPasswordPlain
-        psql -h $dbHost -p $dbPort -U $dbUser -d postgres -c "CREATE DATABASE $dbName;"
-        $env:PGPASSWORD = $null
-        Write-Success "Database recreated successfully"
-    }
+    Write-Success "Database '$dbName' exists and is ready"
 } else {
     Write-Info "Creating database '$dbName'..."
     $env:PGPASSWORD = $dbPasswordPlain
@@ -279,9 +269,9 @@ if ($LASTEXITCODE -eq 0) {
     Write-Success "Database tables and seed data created"
     Write-Host ""
     Write-Host "  Multi-Tenant Architecture Enabled:" -ForegroundColor Cyan
-    Write-Host "    ✓ Default Tenant: ExITS Finance System" -ForegroundColor Green
-    Write-Host "    ✓ Subscription: Enterprise (unlimited)" -ForegroundColor Green
-    Write-Host "    ✓ All existing data migrated to default tenant" -ForegroundColor Green
+    Write-Host "    - Default Tenant: ExITS Finance System" -ForegroundColor Green
+    Write-Host "    - Subscription: Enterprise (unlimited)" -ForegroundColor Green
+    Write-Host "    - All existing data migrated to default tenant" -ForegroundColor Green
     Write-Host ""
 } else {
     Write-ErrorMsg "Failed to run migrations"
@@ -332,13 +322,13 @@ Set-Location $ScriptDir
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  SETUP COMPLETED SUCCESSFULLY! ✓" -ForegroundColor Green
+Write-Host "  SETUP COMPLETED SUCCESSFULLY!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "Your ExITS Loan Management System is ready!" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "🏢 Multi-Tenant SaaS Platform Enabled" -ForegroundColor Magenta
+Write-Host "Multi-Tenant SaaS Platform Enabled" -ForegroundColor Magenta
 Write-Host "   Your system is ready to serve multiple companies" -ForegroundColor DarkGray
 Write-Host "   with complete data isolation and subscription management." -ForegroundColor DarkGray
 Write-Host ""
@@ -386,10 +376,10 @@ Write-Host ""
 Write-Host "Or use the start-all.ps1 script to start all services at once!" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "📚 Documentation:" -ForegroundColor Cyan
+Write-Host "Documentation:" -ForegroundColor Cyan
 Write-Host "  - README.md - General setup and usage" -ForegroundColor Gray
 Write-Host "  - MULTI-TENANT-GUIDE.md - SaaS implementation guide" -ForegroundColor Gray
 Write-Host "  - SETUP-GUIDE.md - Detailed setup instructions" -ForegroundColor Gray
 Write-Host ""
-Write-Host "Press any key to exit..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Write-Host "Setup complete! You can now start the applications." -ForegroundColor Green
+Write-Host ""

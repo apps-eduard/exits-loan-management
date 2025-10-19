@@ -50,7 +50,7 @@ export class DashboardLayoutComponent {
   menuItems = computed(() => {
     const items = this.isSuperAdmin() ? this.superAdminMenuItems : this.tenantAdminMenuItems;
     // Filter based on permissions (only for tenant admin)
-    return items.filter(item => 
+    return items.filter(item =>
       !item.permission || this.authService.hasPermission(item.permission)
     );
   });
@@ -80,6 +80,16 @@ export class DashboardLayoutComponent {
     const user = this.user();
     if (!user) return '?';
     return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+  }
+
+  getTenantInitials(): string {
+    const user = this.user();
+    if (!user?.tenant?.companyName) return '?';
+    const words = user.tenant.companyName.split(' ');
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
   }
 
   logout(): void {

@@ -28,6 +28,8 @@ export interface UserWithRole {
   organizationalUnitId: string;
   organizationalUnitName: string;
   tenantId: string; // For multi-tenant isolation
+  tenantName: string;
+  tenantCompanyName: string;
   isSuperAdmin: boolean; // Can access all tenants
   status: string;
 }
@@ -45,11 +47,14 @@ export class AuthService {
         u.role_id, r.name as role_name, u.status,
         u.organizational_unit_id, ou.name as organizational_unit_name,
         u.tenant_id,
+        t.tenant_code as tenant_name,
+        t.company_name as tenant_company_name,
         COALESCE(u.is_super_admin, false) as is_super_admin,
         'user' as user_type
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
       INNER JOIN organizational_units ou ON u.organizational_unit_id = ou.id
+      INNER JOIN tenants t ON u.tenant_id = t.id
       WHERE u.email = $1
     `,
       [email]
@@ -64,10 +69,13 @@ export class AuthService {
           'customer' as role_id, 'Customer' as role_name, c.status,
           c.organizational_unit_id, ou.name as organizational_unit_name,
           c.tenant_id,
+          t.tenant_code as tenant_name,
+          t.company_name as tenant_company_name,
           false as is_super_admin,
           'customer' as user_type
         FROM customers c
         INNER JOIN organizational_units ou ON c.organizational_unit_id = ou.id
+        INNER JOIN tenants t ON c.tenant_id = t.id
         WHERE c.email = $1
       `,
         [email]
@@ -118,6 +126,8 @@ export class AuthService {
       organizationalUnitId: user.organizational_unit_id,
       organizationalUnitName: user.organizational_unit_name,
       tenantId: user.tenant_id,
+      tenantName: user.tenant_name,
+      tenantCompanyName: user.tenant_company_name,
       isSuperAdmin: user.is_super_admin || false,
       status: user.status,
     };
@@ -165,10 +175,13 @@ export class AuthService {
         u.role_id, r.name as role_name, u.status,
         u.organizational_unit_id, ou.name as organizational_unit_name,
         u.tenant_id,
+        t.tenant_code as tenant_name,
+        t.company_name as tenant_company_name,
         COALESCE(u.is_super_admin, false) as is_super_admin
       FROM users u
       INNER JOIN roles r ON u.role_id = r.id
       INNER JOIN organizational_units ou ON u.organizational_unit_id = ou.id
+      INNER JOIN tenants t ON u.tenant_id = t.id
       WHERE u.id = $1 AND u.status = 'active'
     `,
       [userId]
@@ -190,6 +203,8 @@ export class AuthService {
       organizationalUnitId: user.organizational_unit_id,
       organizationalUnitName: user.organizational_unit_name,
       tenantId: user.tenant_id,
+      tenantName: user.tenant_name,
+      tenantCompanyName: user.tenant_company_name,
       isSuperAdmin: user.is_super_admin || false,
       status: user.status,
     };

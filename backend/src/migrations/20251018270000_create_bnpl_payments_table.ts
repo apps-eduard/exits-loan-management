@@ -105,7 +105,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         updated_at = NOW()
       WHERE id = NEW.customer_id;
       
-      -- Update installment
+      -- Update installment (update the first unpaid installment)
       UPDATE bnpl_installments
       SET 
         amount_paid = amount_paid + NEW.principal_paid + NEW.interest_paid,
@@ -119,10 +119,13 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
           WHEN balance - (NEW.principal_paid + NEW.interest_paid) <= 0 THEN NEW.payment_date
           ELSE payment_date
         END
-      WHERE purchase_id = NEW.purchase_id
-        AND status != 'paid'
-      ORDER BY installment_number ASC
-      LIMIT 1;
+      WHERE id = (
+        SELECT id FROM bnpl_installments
+        WHERE purchase_id = NEW.purchase_id
+          AND status != 'paid'
+        ORDER BY installment_number ASC
+        LIMIT 1
+      );
       
       RETURN NEW;
     END;

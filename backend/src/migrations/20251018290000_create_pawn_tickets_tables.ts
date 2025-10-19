@@ -43,7 +43,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       forfeiture_date DATE,
       
       -- Assignment
-      branch_id UUID REFERENCES branches(id),
+      branch_id UUID,
       appraiser VARCHAR(255),
       cashier VARCHAR(255),
       

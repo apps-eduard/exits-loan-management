@@ -57,7 +57,7 @@ try {
 Write-Host "`n📝 Creating default users..." -ForegroundColor Cyan
 
 # Default password (must be changed on first login)
-$defaultPassword = "ChangeMe123!"
+$defaultPassword = "11223344
 Write-Host "`n⚠️  Default Password: $defaultPassword" -ForegroundColor Yellow
 Write-Host "   All users MUST change this password on first login`n" -ForegroundColor Yellow
 

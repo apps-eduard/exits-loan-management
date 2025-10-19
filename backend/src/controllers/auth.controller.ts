@@ -53,6 +53,11 @@ export const login = async (
             id: user.organizationalUnitId,
             name: user.organizationalUnitName,
           },
+          tenant: {
+            id: user.tenantId,
+            name: user.tenantName,
+            companyName: user.tenantCompanyName,
+          },
           permissions,
         },
         tokens,

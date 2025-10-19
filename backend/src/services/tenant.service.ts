@@ -304,4 +304,55 @@ export class TenantService {
 
     return limits[plan] || limits.free;
   }
+
+  async getTenantsForTesting(): Promise<any[]> {
+    const result = await pool.query(`
+      SELECT 
+        t.id as tenant_id,
+        t.company_name,
+        t.slug,
+        t.status,
+        u.id as user_id,
+        u.email,
+        u.first_name,
+        u.last_name,
+        r.name as role_name
+      FROM tenants t
+      LEFT JOIN users u ON t.id = u.tenant_id AND u.status = 'active'
+      LEFT JOIN roles r ON u.role_id = r.id
+      WHERE t.status IN ('active', 'trial')
+      ORDER BY t.company_name, r.name
+    `);
+
+    console.log(`🔍 Raw SQL results (${result.rows.length} rows):`, result.rows);
+
+    // Group users by tenant
+    const tenantsMap = new Map();
+    
+    result.rows.forEach(row => {
+      const tenantId = row.tenant_id;
+      
+      if (!tenantsMap.has(tenantId)) {
+        tenantsMap.set(tenantId, {
+          id: tenantId,
+          companyName: row.company_name,
+          slug: row.slug,
+          status: row.status,
+          users: []
+        });
+      }
+      
+      if (row.user_id) {
+        tenantsMap.get(tenantId).users.push({
+          id: row.user_id,
+          email: row.email,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          role: row.role_name
+        });
+      }
+    });
+
+    return Array.from(tenantsMap.values());
+  }
 }

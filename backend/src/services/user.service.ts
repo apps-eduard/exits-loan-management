@@ -9,7 +9,8 @@ export interface CreateUserDto {
   lastName: string;
   phoneNumber?: string;
   roleId: string;
-  organizationalUnitId: string;
+  organizationalUnitId?: string; // Optional - will use tenant's Head Office by default
+  tenant_id?: string; // Added for automatic tenant assignment
   password: string;
 }
 
@@ -117,7 +118,7 @@ export class UserService {
     const result = await pool.query(
       `
       SELECT 
-        u.id, u.email, u.first_name, u.last_name, u.phone_number,
+        u.id, u.email, u.first_name, u.last_name, u.phone,
         u.role_id, u.organizational_unit_id, u.status,
         u.last_login_at, u.created_at, u.updated_at,
         r.id as role_id, r.name as role_name, r.description as role_description, r.is_default as role_is_default,
@@ -153,7 +154,7 @@ export class UserService {
       email: row.email,
       firstName: row.first_name,
       lastName: row.last_name,
-      phoneNumber: row.phone_number,
+      phoneNumber: row.phone,
       roleId: row.role_id,
       role: {
         id: row.role_id,
@@ -199,17 +200,35 @@ export class UserService {
       );
     }
 
+    // Get tenant's Head Office organizational unit
+    const headOfficeResult = await pool.query(
+      `SELECT id FROM organizational_units 
+       WHERE tenant_id = $1 AND (code LIKE '%-HQ' OR code = 'HQ' OR name = 'Head Office')
+       ORDER BY created_at ASC
+       LIMIT 1`,
+      [userData.tenant_id]
+    );
+
+    if (headOfficeResult.rows.length === 0) {
+      throw new HttpException(
+        StatusCodes.BAD_REQUEST,
+        "No Head Office organizational unit found for this tenant"
+      );
+    }
+
+    const headOfficeId = headOfficeResult.rows[0].id;
+
     // Hash password
     const passwordHash = await bcrypt.hash(userData.password, 10);
 
-    // Insert user
+    // Insert user with tenant's Head Office as default OU
     const result = await pool.query(
       `
       INSERT INTO users (
-        email, first_name, last_name, phone_number, 
-        role_id, organizational_unit_id, password_hash, status
+        email, first_name, last_name, phone, 
+        role_id, organizational_unit_id, tenant_id, password_hash, status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'invited')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'invited')
       RETURNING id
     `,
       [
@@ -218,7 +237,8 @@ export class UserService {
         userData.lastName,
         userData.phoneNumber,
         userData.roleId,
-        userData.organizationalUnitId,
+        headOfficeId, // Use tenant's Head Office instead of userData.organizationalUnitId
+        userData.tenant_id,
         passwordHash,
       ]
     );
@@ -254,7 +274,7 @@ export class UserService {
     }
 
     if (userData.phoneNumber !== undefined) {
-      updates.push(`phone_number = $${paramIndex}`);
+      updates.push(`phone = $${paramIndex}`);
       params.push(userData.phoneNumber);
       paramIndex++;
     }
@@ -379,6 +399,25 @@ export class UserService {
       description: row.description,
       resource: row.resource,
       action: row.action,
+    }));
+  }
+
+  async getOrganizationalUnits() {
+    const result = await pool.query(
+      `
+      SELECT id, name, code, type, description, parent_id
+      FROM organizational_units
+      ORDER BY name ASC
+    `
+    );
+
+    return result.rows.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      code: row.code,
+      type: row.type,
+      description: row.description,
+      parentId: row.parent_id,
     }));
   }
 }

@@ -14,6 +14,9 @@ router.get("/roles", requirePermissions(["manage_users", "view_users"]), userCon
 // Get all permissions
 router.get("/permissions", requirePermissions(["manage_users", "view_users"]), userController.getPermissions);
 
+// Get organizational units
+router.get("/organizational-units", requirePermissions(["manage_users", "view_users"]), userController.getOrganizationalUnits);
+
 // Get role permissions
 router.get("/roles/:roleId/permissions", requirePermissions(["manage_users", "view_users"]), userController.getRolePermissions);
 
